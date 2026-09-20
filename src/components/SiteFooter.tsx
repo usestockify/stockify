@@ -66,32 +66,13 @@ export async function SiteFooter() {
           <BrandWireframe />
         </div>
         <div className="div-double-solid-v" aria-hidden="true" />
-        {COLUMNS.map((col, i) => (
+        {COLUMNS.map((col) => (
           <div key={col.key} className="gf-col-wrap" style={{ display: "contents" }}>
             <nav className="gf-col" aria-label={t(`col.${col.key}`)}>
               <h2>{t(`col.${col.key}`)}</h2>
               {col.links.map((l) => (
                 <FooterLink key={l.href + l.key} href={l.href} label={t(`link.${l.key}`)} external={l.external} />
               ))}
-              {i === COLUMNS.length - 1 ? (
-                <>
-                  <h2 style={{ marginTop: 12 }}>{t("col.socials")}</h2>
-                  <div className="gf-socials">
-                    <a href={BRAND.xUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onX", { name: BRAND.name })}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/brands/x.svg" alt="" width={14} height={14} />
-                    </a>
-                    <a href={BRAND.telegramUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onTelegram", { name: BRAND.name })}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/brands/telegram.svg" alt="" width={14} height={14} />
-                    </a>
-                    <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noopener noreferrer" aria-label={t("aria.explorer", { chain: CHAIN_NAME })}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/brands/robinhood-mark.svg" alt="" width={14} height={14} />
-                    </a>
-                  </div>
-                </>
-              ) : null}
             </nav>
             <div className="div-double-solid-v" aria-hidden="true" />
           </div>
@@ -109,7 +90,7 @@ export async function SiteFooter() {
         </div>
         <div className="div-double-dashed gf-top" aria-hidden="true" />
         <div className="gf-mobile-grid">
-          {COLUMNS.map((col, i) => (
+          {COLUMNS.map((col) => (
             <div key={col.key}>
               <span className="gf-h">{t(`col.${col.key}`)}</span>
               {col.links.map((l) => (

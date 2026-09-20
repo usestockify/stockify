@@ -31,8 +31,8 @@ export const BRAND = {
   /** Drop the mark file here; BrandMark reads this path and nothing else. */
   logoSrc: "/brand/logo.png",
   /** X / Twitter handle without the @. */
-  xHandle: envText(process.env.NEXT_PUBLIC_X_HANDLE, "stockify"),
-  xUrl: envText(process.env.NEXT_PUBLIC_X_URL, "https://x.com/stockify"),
+  xHandle: envText(process.env.NEXT_PUBLIC_X_HANDLE, "_stockify"),
+  xUrl: envText(process.env.NEXT_PUBLIC_X_URL, "https://x.com/_stockify"),
   /** Telegram discussion group. Override with NEXT_PUBLIC_TELEGRAM_URL if the invite is rotated. */
   telegramUrl: envText(process.env.NEXT_PUBLIC_TELEGRAM_URL, "https://t.me/+qUeVjZqryk4yOThk"),
   repoUrl: envText(process.env.NEXT_PUBLIC_REPO_URL, "https://github.com/pablooalonnso-web/claudemaxing5"),

@@ -159,10 +159,6 @@ export default async function VerifyPage() {
               {t("repro.p2.before")}
               <a href="/verification/latest.json">/verification/latest.json</a>
               {t("repro.p2.middle")}
-              <a href={BRAND.xUrl} target="_blank" rel="noopener noreferrer">
-                @{BRAND.xHandle}
-              </a>
-              {t("repro.p2.or")}
               <Link href="/help/contact">{t("repro.p2.link")}</Link>
               {t("repro.p2.after")}
             </p>

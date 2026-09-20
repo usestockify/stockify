@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { WalletConnectButton } from "./wallet/WalletConnectButton";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useT } from "@/i18n/client";
+import { BRAND } from "@/lib/brand";
 import type { TFunction } from "@/i18n";
 
 type Item = { href: string; label: string; blurb: string; icon: ReactNode; badge?: string; soon?: boolean };
@@ -152,6 +153,9 @@ export function PrimaryNavigation() {
       </nav>
       <div className="gh-actions">
         <LanguageSwitcher />
+        <a className="gh-x" href={BRAND.xUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onX", { handle: BRAND.xHandle })}>
+          {BRAND.xHandle}
+        </a>
         <WalletConnectButton />
         <button
           className="gh-burger"
@@ -186,6 +190,9 @@ export function PrimaryNavigation() {
             </Link>
           ))}
           <div className="gh-mobile-actions">
+            <a className="gh-x" href={BRAND.xUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onX", { handle: BRAND.xHandle })}>
+              {BRAND.xHandle}
+            </a>
             <LanguageSwitcher variant="list" />
           </div>
         </nav>

@@ -6,6 +6,7 @@ export const nav: NamespaceMessages = {
     "aria.home": "{name} home",
     "aria.openMenu": "Open menu",
     "aria.closeMenu": "Close menu",
+    "aria.onX": "@{handle} on X",
     "group.products": "Products",
     "group.resources": "Resources",
     "group.soon": "Coming soon",

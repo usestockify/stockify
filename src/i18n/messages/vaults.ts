@@ -84,7 +84,7 @@ export const vaults: NamespaceMessages = {
     "table.yourPosition": "Your position",
     "table.shares": "{n} shares",
     "table.updating": "Updating…",
-    "table.connectToSee": "Connect your wallet to see your position",
+    "table.connectToSee": "Connect wallet",
     "table.action": "Action",
     "table.deposit": "Deposit USDG",
     "table.view": "View vault",

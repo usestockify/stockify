@@ -1147,6 +1147,20 @@ hr.g-hr-soft {
   align-items: center;
   gap: 8px;
 }
+.gh-x {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 10px;
+  color: var(--slate);
+  font: 500 13px/1 var(--sans);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.gh-x:hover {
+  color: var(--accent, #2d6a4f);
+}
 @media (min-width: 1024px) {
   .gh-actions > .gh-mobile-only {
     display: none;

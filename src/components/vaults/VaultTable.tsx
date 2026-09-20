@@ -171,7 +171,7 @@ function CatalogRow({ row }: { row: StockifyMarketRow }) {
     <tr>
       <td>
         <PrefetchLink href={marketHref(row.slug)} className="vault-table-identity">
-          <StockLogo symbol={row.symbol} logoUrl={row.logoUrl} size={30} />
+          <StockLogo symbol={row.symbol} logoUrl={row.logoUrl} name={row.name} size={32} />
           <span>
             <b>{row.name ?? row.symbol}</b>
             <small className="mono">
@@ -213,7 +213,7 @@ function CatalogRow({ row }: { row: StockifyMarketRow }) {
           {t(`rangeStatus.${row.vault?.range ?? "waiting"}`)}
         </span>
       </td>
-      <td data-label={t("table.yourPosition")} className="mono vault-table-num">
+      <td data-label={t("table.yourPosition")} className="vault-table-position">
         <VaultPositionCell vault={row.vault?.address ?? null} />
       </td>
       <td className="vault-table-action">
