@@ -9,10 +9,12 @@ export const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD" as cons
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
 
 /**
- * Unpublished Stockify protocol token. No ticker is shown until one exists.
- * This is not USDG and not a Robinhood Stock Token.
+ * Stockify protocol token on Robinhood Chain.
+ * Override with NEXT_PUBLIC_TOKEN_ADDRESS. This is not USDG and not a Robinhood Stock Token.
  */
-export const TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS ?? ZERO_ADDRESS) as `0x${string}`;
+export const TOKEN_ADDRESS = (
+  process.env.NEXT_PUBLIC_TOKEN_ADDRESS?.trim() || "0x1d414481455b50dde4d707ad67feb24c967b65b8"
+) as `0x${string}`;
 export const PROTOCOL_TOKEN_LIVE = TOKEN_ADDRESS !== ZERO_ADDRESS;
 
 /**

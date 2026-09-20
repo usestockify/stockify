@@ -932,6 +932,60 @@ hr.g-hr-soft {
   background: var(--fog);
   border-bottom: 1px dashed rgba(61, 59, 79, 0.2);
 }
+.site-ca-banner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 16px;
+  background: var(--green);
+  color: var(--fog);
+}
+.site-ca-banner .ca-button {
+  height: auto;
+  max-width: 100%;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--fog);
+  box-shadow: none;
+  transform: none;
+  white-space: nowrap;
+}
+.site-ca-banner .ca-button:hover,
+.site-ca-banner .ca-button:active {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.88;
+}
+.site-ca-banner .ca-label {
+  background: transparent;
+  color: var(--seafoam, #c5d6c8);
+  padding: 0;
+  letter-spacing: 0.12em;
+}
+.site-ca-banner .ca-label::after {
+  content: ":";
+}
+.site-ca-banner .ca-addr {
+  color: var(--fog);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.site-ca-banner .ca-copied {
+  color: var(--seafoam, #c5d6c8);
+}
+@media (max-width: 640px) {
+  .site-ca-banner {
+    padding: 6px 12px;
+  }
+  .site-ca-banner .ca-addr {
+    font-size: 11px;
+    max-width: min(100%, 72vw);
+  }
+}
 .gh-inner {
   display: flex;
   align-items: center;
