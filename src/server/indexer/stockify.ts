@@ -53,6 +53,10 @@ const g = globalThis as unknown as { __stockifyIndex?: StockifyIndex; __stockify
 
 function load(): StockifyIndex {
   if (g.__stockifyIndex) return g.__stockifyIndex;
+  if (process.env.VERCEL === "1") {
+    g.__stockifyIndex = empty();
+    return g.__stockifyIndex;
+  }
   try {
     g.__stockifyIndex = JSON.parse(fs.readFileSync(FILE, "utf8")) as StockifyIndex;
   } catch {
@@ -63,6 +67,7 @@ function load(): StockifyIndex {
 
 function save(state: StockifyIndex) {
   g.__stockifyIndex = state;
+  if (process.env.VERCEL === "1") return;
   try {
     fs.mkdirSync(path.dirname(FILE), { recursive: true });
     fs.writeFileSync(FILE, JSON.stringify(state));
@@ -205,6 +210,7 @@ export async function tickStockifyIndexer(): Promise<StockifyIndex> {
 }
 
 export function startStockifyIndexerLoop() {
+  if (process.env.VERCEL === "1") return;
   if (g.__stockifyLoop) return;
   g.__stockifyLoop = true;
   const run = async () => {

@@ -440,6 +440,7 @@ export async function tickIndexer(opts?: { maxChunks?: number; budgetMs?: number
 }
 
 export function indexerSnapshot() {
+  try {
   const db = store();
   const indexed = db.getIndexer();
   const head = indexed.chainHead ? BigInt(indexed.chainHead) : null;
@@ -464,6 +465,27 @@ export function indexerSnapshot() {
     factory: PONS_V2.factory,
     startBlock: START,
   };
+  } catch {
+    return {
+      status: "error",
+      lastError: "indexer offline",
+      lastSuccessAt: null,
+      liveStatus: "idle",
+      backfillStatus: "idle",
+      chainHead: "",
+      startBlock: START,
+      historicalBackfillBlock: START,
+      liveHeadBlock: "0",
+      blocksBehind: "0",
+      liveLag: "0",
+      backfillLag: "0",
+      progressPct: 0,
+      label: "OFFLINE",
+      launchCount: 0,
+      engine: "memory",
+      factory: PONS_V2.factory,
+    };
+  }
 }
 
 export function rowToLaunch(row: PonsLaunchRow): PonsLaunch {
@@ -522,18 +544,23 @@ export function rowToLaunch(row: PonsLaunchRow): PonsLaunch {
 }
 
 export async function getIndexedLaunches(): Promise<DataEnvelope<PonsLaunch[]>> {
-  void initStore(START).catch(() => null);
-  startIndexerLoop();
-  const rows = store().allLaunches();
-  if (!rows.length) {
-    const snap = indexerSnapshot();
-    if (snap.status === "error") return failed(snap.lastError ?? "PONS indexer error");
-    return ready([], snap.lastSuccessAt ?? undefined);
+  try {
+    void initStore(START).catch(() => null);
+    if (process.env.VERCEL !== "1") startIndexerLoop();
+    const rows = store().allLaunches();
+    if (!rows.length) {
+      const snap = indexerSnapshot();
+      if (snap.status === "error") return failed(snap.lastError ?? "PONS indexer error");
+      return ready([], snap.lastSuccessAt ?? undefined);
+    }
+    return ready(rows.filter((r) => !r.sanityError).map(rowToLaunch));
+  } catch {
+    return ready([]);
   }
-  return ready(rows.filter((r) => !r.sanityError).map(rowToLaunch));
 }
 
 export function startIndexerLoop() {
+  if (process.env.VERCEL === "1") return;
   if (process.env.STOCKIFY_INDEXER_EXTERNAL === "1") return;
   if (g.__ponsLoop) return;
   g.__ponsLoop = true;

@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("contact.meta.title") };
 }
 
-const PORTAL = process.env.NEXT_PUBLIC_SUPPORT_URL;
-const SUPPORT_URL = PORTAL ?? BRAND.xUrl;
+const PORTAL = process.env.NEXT_PUBLIC_SUPPORT_URL?.trim() || undefined;
+const SUPPORT_URL = PORTAL || BRAND.xUrl;
 
 export default async function HelpContactPage() {
   const t = await getT("help");

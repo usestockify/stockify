@@ -210,7 +210,7 @@ async function fromUpstream(base: string): Promise<VaultSnapshotsResponse | null
 }
 
 async function build(): Promise<VaultSnapshotsResponse> {
-  const upstream = process.env.UPSTREAM_API_URL;
+  const upstream = process.env.UPSTREAM_API_URL?.trim();
   if (upstream) {
     const data = await fromUpstream(upstream);
     if (data) return data;

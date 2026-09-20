@@ -35,6 +35,7 @@ async function load(): Promise<Store> {
 
 let persistTimer: NodeJS.Timeout | undefined;
 function schedulePersist(store: Store) {
+  if (process.env.VERCEL === "1") return;
   if (persistTimer) return;
   persistTimer = setTimeout(async () => {
     persistTimer = undefined;

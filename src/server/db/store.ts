@@ -6,13 +6,27 @@ import { emptyIndexer, migrateIndexer } from "./types";
 export type { FileStore, IndexerStateRow, PonsEventRow, PonsLaunchRow, Store } from "./types";
 export { emptyIndexer, emptyLaunchFields, migrateIndexer } from "./types";
 
+function onVercel() {
+  return process.env.VERCEL === "1";
+}
+
+/** Local JSON files are for the Node process on disk. Vercel functions cannot mkdir cwd. */
+function localFilesEnabled() {
+  return !onVercel();
+}
+
+function postgresUrl() {
+  const url = process.env.DATABASE_URL?.trim() ?? "";
+  return url.startsWith("postgres") ? url : "";
+}
+
 const DATA_DIR = path.join(process.cwd(), ".data");
 const FILE = path.join(DATA_DIR, "pons-index.json");
 
 type PersistFn = (store: FileStore) => void;
 
 let mem: FileStore | null = null;
-let engineName = "json";
+let engineName = "";
 let persist: PersistFn = saveJson;
 let initPromise: Promise<void> | null = null;
 let lastMtime = 0;
@@ -28,7 +42,13 @@ function sleep(ms: number) {
 }
 
 export function ensureDataDir() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!localFilesEnabled()) return false;
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function loadJson(startBlock: string): FileStore {
@@ -46,8 +66,8 @@ function loadJson(startBlock: string): FileStore {
 }
 
 function saveJson(store: FileStore) {
-  if (!isWriter()) return;
-  ensureDataDir();
+  if (!isWriter() || !localFilesEnabled()) return;
+  if (!ensureDataDir()) return;
   const tmp = `${FILE}.${process.pid}.tmp`;
   try {
     fs.writeFileSync(tmp, JSON.stringify(store));
@@ -81,6 +101,7 @@ function persistSoon(store: FileStore) {
 }
 
 function reloadFromDisk(startBlock: string) {
+  if (!localFilesEnabled()) return;
   if (isWriter() && mem) return;
   try {
     const mtime = fs.statSync(FILE).mtimeMs;
@@ -116,18 +137,21 @@ function applyEventUpsert(cur: FileStore, rows: PonsEventRow[]) {
   }
 }
 
+function memoryStore(startBlock: string): FileStore {
+  return { indexer: emptyIndexer(startBlock), launches: [], events: [] };
+}
+
 export async function initStore(startBlock: string) {
   if (initPromise) return initPromise;
   initPromise = (async () => {
-    ensureDataDir();
     if (!isWriter()) {
-      mem = loadJson(startBlock);
+      mem = localFilesEnabled() ? loadJson(startBlock) : memoryStore(startBlock);
       persist = () => {};
-      engineName = "json";
+      engineName = localFilesEnabled() ? "json" : "memory";
       return;
     }
-    const url = process.env.DATABASE_URL?.trim() ?? "";
-    if (url.startsWith("postgres")) {
+    const url = postgresUrl();
+    if (url) {
       try {
         const { createRequire } = await import("module");
         const req = createRequire(path.join(process.cwd(), "package.json"));
@@ -155,7 +179,7 @@ CREATE TABLE IF NOT EXISTS kv_meta (key text PRIMARY KEY, payload jsonb NOT NULL
         };
         engineName = "postgres";
         persist = (store) => {
-          saveJson(store);
+          if (localFilesEnabled()) saveJson(store);
           void (async () => {
             const client = await pool.connect();
             try {
@@ -185,6 +209,13 @@ CREATE TABLE IF NOT EXISTS kv_meta (key text PRIMARY KEY, payload jsonb NOT NULL
         engineName = "postgres-unavailable";
       }
     }
+    if (!localFilesEnabled()) {
+      mem = mem ?? memoryStore(startBlock);
+      persist = persist === saveJson ? () => {} : persist;
+      if (engineName !== "postgres") engineName = engineName === "postgres-unavailable" ? "postgres-unavailable" : "memory";
+      return;
+    }
+    ensureDataDir();
     mem = loadJson(startBlock);
     persist = saveJson;
     if (engineName !== "postgres-unavailable") engineName = "json";
@@ -194,17 +225,24 @@ CREATE TABLE IF NOT EXISTS kv_meta (key text PRIMARY KEY, payload jsonb NOT NULL
 }
 
 export function pingStore() {
-  ensureDataDir();
-  return engineName || "json";
+  if (engineName) return engineName;
+  if (postgresUrl()) return "postgres";
+  return localFilesEnabled() ? "json" : "memory";
 }
 
 export function getStore(startBlock: string): Store {
   if (!mem) {
-    ensureDataDir();
-    mem = loadJson(startBlock);
-    persist = saveJson;
-    if (!engineName) engineName = "json";
-    void initStore(startBlock);
+    if (localFilesEnabled()) {
+      ensureDataDir();
+      mem = loadJson(startBlock);
+      persist = saveJson;
+      if (!engineName) engineName = "json";
+    } else {
+      mem = memoryStore(startBlock);
+      persist = () => {};
+      if (!engineName) engineName = postgresUrl() ? "postgres" : "memory";
+    }
+    void initStore(startBlock).catch(() => null);
   }
   reloadFromDisk(startBlock);
   return {

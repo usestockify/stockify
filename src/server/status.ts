@@ -73,7 +73,7 @@ export async function getStatus(): Promise<StatusReport> {
   mark("PONS", pons.ok, pons.detail);
 
   const ponsIdx = indexerSnapshot();
-  mark("Indexer", Boolean(ponsIdx), "PONS indexer");
+  mark("Indexer", ponsIdx?.status !== "error", ponsIdx?.lastError ?? "PONS indexer");
 
   let dbOk = true;
   try {

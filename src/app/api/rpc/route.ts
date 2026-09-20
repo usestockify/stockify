@@ -33,9 +33,11 @@ export async function POST(req: Request) {
     const errors = blocked.map((c) => reject(c?.id, "Method not allowed through the relay"));
     return NextResponse.json(Array.isArray(body) ? errors : errors[0], { status: 403 });
   }
-  const urls = process.env.RPC_URL ? [process.env.RPC_URL, ...RPC_URLS] : RPC_URLS;
+  const privateRpc = process.env.RPC_URL?.trim();
+  const urls = privateRpc ? [privateRpc, ...RPC_URLS] : RPC_URLS;
   let lastError = "RPC relay failed";
   for (const url of urls) {
+    if (!url) continue;
     try {
       const upstream = await fetch(url, {
         method: "POST",

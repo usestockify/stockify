@@ -68,22 +68,26 @@ export async function loadIndexedActivity(owner: Address): Promise<{ rows: Walle
   } catch {
     /* fall through to local indexer */
   }
-  await initStore(PONS_FACTORY_START_BLOCK.toString()).catch(() => null);
-  const local = getStore(PONS_FACTORY_START_BLOCK.toString()).eventsForActor(owner, 40);
-  if (!local.length) return { rows: [], source: "STOCKIFY_INDEXER", scope: "Stockify/PONS activity" };
-  return {
-    source: "STOCKIFY_INDEXER",
-    scope: "Stockify/PONS activity",
-    rows: local.map((row) => ({
-      hash: row.transactionHash as `0x${string}`,
-      block: row.blockNumber,
-      timestamp: row.createdAt,
-      status: "indexed",
-      kind: row.eventName === "Buy" ? "PONS buy" : row.eventName === "Sell" ? "PONS sell" : row.eventName,
-      token: row.tokenAddress,
-      amount: row.payload.tokensOut ?? row.payload.quoteOut ?? row.payload.quoteIn ?? null,
-      explorer: `${EXPLORER_URL}/tx/${row.transactionHash}`,
-      source: "STOCKIFY_INDEXER" as const,
-    })),
-  };
+  try {
+    await initStore(PONS_FACTORY_START_BLOCK.toString()).catch(() => null);
+    const local = getStore(PONS_FACTORY_START_BLOCK.toString()).eventsForActor(owner, 40);
+    if (!local.length) return { rows: [], source: "STOCKIFY_INDEXER", scope: "Stockify/PONS activity" };
+    return {
+      source: "STOCKIFY_INDEXER",
+      scope: "Stockify/PONS activity",
+      rows: local.map((row) => ({
+        hash: row.transactionHash as `0x${string}`,
+        block: row.blockNumber,
+        timestamp: row.createdAt,
+        status: "indexed",
+        kind: row.eventName === "Buy" ? "PONS buy" : row.eventName === "Sell" ? "PONS sell" : row.eventName,
+        token: row.tokenAddress,
+        amount: row.payload.tokensOut ?? row.payload.quoteOut ?? row.payload.quoteIn ?? null,
+        explorer: `${EXPLORER_URL}/tx/${row.transactionHash}`,
+        source: "STOCKIFY_INDEXER" as const,
+      })),
+    };
+  } catch {
+    return { rows: [], source: "STOCKIFY_INDEXER", scope: "indexer offline" };
+  }
 }
