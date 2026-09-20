@@ -1,32 +1,48 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Bot, Check, Clock3, Coins, Flame, LockKeyhole, RadioTower, RefreshCw, Route, ShieldCheck, Sparkles, WalletCards } from "lucide-react";
+import { ArrowRight, Clock3, RadioTower, RefreshCw, ShieldCheck, WalletCards } from "lucide-react";
+import { DocsFigure } from "@/components/docs/DocsFigure";
+import {
+  ContractsArt,
+  DepositArt,
+  FeesArt,
+  MarketsArt,
+  OracleArt,
+  OverviewArt,
+  PortfolioArt,
+  RangeArt,
+  RisksArt,
+  SharesArt,
+  StocksArt,
+  TradeArt,
+  UsdgHubArt,
+  VaultsArt,
+  WithdrawArt,
+} from "@/components/docs/figures";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getT } from "@/i18n/server";
-import { BRAND } from "@/lib/brand";
-import { explorerAddress } from "@/lib/chain";
-import { VAULT_PINS } from "@/lib/registry";
+import { explorerAddress, explorerToken } from "@/lib/chain";
+import { STOCKIFY_MARKETS } from "@/lib/markets";
+import { PONS_CONTRACTS, PROTOCOL_CONTRACTS } from "@/lib/protocol-contracts";
+import { getStockifyCatalog } from "@/lib/stockify/catalog";
 import styles from "@/styles/docs.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("docs");
-  return { title: `${t("meta.title")} · ${BRAND.name}` };
+  return { title: t("meta.title") };
 }
 
-const CONTRACTS = [...VAULT_PINS].sort((a, b) => a.symbol.localeCompare(b.symbol));
+const MARKETS = [...STOCKIFY_MARKETS].sort((a, b) => a.symbol.localeCompare(b.symbol));
 
 export default async function DocsPage() {
   const t = await getT("docs");
-  const brand = BRAND.name;
-  const token = t("token", { brand });
-  const steps = [1, 2, 3, 4] as const;
-  const roadmap = [
-    { n: "01", id: 1, icon: "sparkles" },
-    { n: "02", id: 2, icon: "sparkles" },
-    { n: "03", id: 3, icon: "sparkles" },
-    { n: "04", id: 4, icon: "bot" },
-  ] as const;
+  const catalog = await getStockifyCatalog();
+  const markets = MARKETS.map((m) => {
+    const row = catalog.data?.find((item) => item.symbol === m.symbol);
+    return { symbol: m.symbol, name: row?.name ?? m.symbol, deployment: row?.deployment ?? null };
+  });
   return (
     <main className="app-page">
       <SiteHeader />
@@ -37,13 +53,22 @@ export default async function DocsPage() {
             <Link href="/help">{t("aside.help")}</Link>
             <Link href="/verify">{t("aside.verify")}</Link>
             <a href="#overview">{t("aside.overview")}</a>
+            <a href="#markets">{t("aside.markets")}</a>
             <a href="#vaults">{t("aside.vaults")}</a>
-            <a href="#safeguards">{t("aside.safeguards")}</a>
-            <a href="#flywheel">{t("aside.flywheel", { token })}</a>
+            <a href="#usdg">{t("aside.usdg")}</a>
+            <a href="#stocks">{t("aside.stocks")}</a>
+            <a href="#deposits">{t("aside.deposits")}</a>
+            <a href="#shares">{t("aside.shares")}</a>
+            <a href="#withdrawals">{t("aside.withdrawals")}</a>
+            <a href="#ranges">{t("aside.ranges")}</a>
+            <a href="#fees">{t("aside.fees")}</a>
             <a href="#oracles">{t("aside.oracles")}</a>
+            <a href="#portfolio">{t("aside.portfolio")}</a>
+            <a href="#trade">{t("aside.trade")}</a>
             <a href="#contracts">{t("aside.contracts")}</a>
-            <a href="#source">{t("aside.source")}</a>
-            <a href="#roadmap">{t("aside.roadmap")}</a>
+            <a href="#risks">{t("aside.risks")}</a>
+            <a href="#supported">{t("aside.supported")}</a>
+            <a href="#chain">{t("aside.chain")}</a>
             <a href="#faq">{t("aside.faq")}</a>
           </nav>
         </aside>
@@ -59,108 +84,45 @@ export default async function DocsPage() {
               {t("hero.title.line2")}
               <em>{t("hero.title.em")}</em>
             </h1>
-            <p>{t("hero.lead", { brand })}</p>
+            <p>{t("hero.lead")}</p>
             <div className={styles.heroActions}>
-              <Link className="btn btn-primary" href="/vaults">
+              <Link className="btn btn-primary" href="/markets">
                 {t("hero.explore")} <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <a className="btn btn-ghost" href="#contracts">
                 {t("hero.contracts")}
               </a>
             </div>
+            <DocsFigure n="01" caption={t("fig.overview")}>
+              <OverviewArt />
+            </DocsFigure>
           </header>
 
-          <section className={styles.section} id="vaults">
-            <div className={styles.sectionLabel}>{t("vaults.label")}</div>
+          <ThreeStep id="markets" prefix="markets" t={t} figure={<DocsFigure n="02" caption={t("fig.markets")}><MarketsArt /></DocsFigure>} />
+          <FourStep id="vaults" prefix="vaults" t={t} figure={<DocsFigure n="03" caption={t("fig.vaults")}><VaultsArt /></DocsFigure>} />
+          <ThreeStep id="usdg" prefix="usdg" t={t} figure={<DocsFigure n="04" caption={t("fig.usdg")}><UsdgHubArt /></DocsFigure>} />
+          <ThreeStep id="stocks" prefix="stocks" t={t} figure={<DocsFigure n="05" caption={t("fig.stocks")}><StocksArt /></DocsFigure>} />
+          <ThreeStep id="deposits" prefix="deposits" t={t} figure={<DocsFigure n="06" caption={t("fig.deposits")}><DepositArt /></DocsFigure>} />
+          <ThreeStep id="shares" prefix="shares" t={t} figure={<DocsFigure n="07" caption={t("fig.shares")}><SharesArt /></DocsFigure>} />
+          <ThreeStep id="withdrawals" prefix="withdrawals" t={t} figure={<DocsFigure n="08" caption={t("fig.withdrawals")}><WithdrawArt /></DocsFigure>} />
+          <ThreeStep id="ranges" prefix="ranges" t={t} figure={<DocsFigure n="09" caption={t("fig.ranges")}><RangeArt /></DocsFigure>} />
+
+          <section className={styles.section} id="fees">
+            <div className={styles.sectionLabel}>{t("fees.label")}</div>
             <div className={styles.sectionIntro}>
-              <h2>{t("vaults.title")}</h2>
-              <p>{t("vaults.lead")}</p>
+              <h2>{t("fees.title")}</h2>
+              <p>{t("fees.lead")}</p>
             </div>
-            <div className={styles.steps}>
-              {steps.map((n, i) => (
+            <DocsFigure n="10" caption={t("fig.fees")}>
+              <FeesArt />
+            </DocsFigure>
+            <div className={styles.feeSplit}>
+              {([1, 2, 3] as const).map((n) => (
                 <article key={n}>
-                  <span>{i + 1}</span>
-                  <h3>{t(`vaults.step${n}.title`)}</h3>
-                  <p>{t(`vaults.step${n}.body`)}</p>
+                  <h3>{t(`fees.${n}.title`)}</h3>
+                  <p>{t(`fees.${n}.body`)}</p>
                 </article>
               ))}
-            </div>
-          </section>
-
-          <section className={styles.section} id="safeguards">
-            <div className={styles.sectionLabel}>{t("safeguards.label")}</div>
-            <div className={styles.sectionIntro}>
-              <h2>{t("safeguards.title")}</h2>
-              <p>{t("safeguards.lead", { brand })}</p>
-            </div>
-            <div className={styles.safeguardGrid}>
-              <article>
-                <ShieldCheck size={22} aria-hidden="true" />
-                <h3>{t("safeguards.bounded.title")}</h3>
-                <p>{t("safeguards.bounded.body")}</p>
-              </article>
-              <article>
-                <LockKeyhole size={22} aria-hidden="true" />
-                <h3>{t("safeguards.separated.title")}</h3>
-                <p>{t("safeguards.separated.body")}</p>
-              </article>
-              <article>
-                <Clock3 size={22} aria-hidden="true" />
-                <h3>{t("safeguards.delayed.title")}</h3>
-                <p>{t("safeguards.delayed.body")}</p>
-              </article>
-              <article>
-                <Route size={22} aria-hidden="true" />
-                <h3>{t("safeguards.exits.title")}</h3>
-                <p>{t("safeguards.exits.body")}</p>
-              </article>
-            </div>
-          </section>
-
-
-          <section className={styles.section} id="flywheel">
-            <div className={styles.sectionLabel}>{t("flywheel.label", { token })}</div>
-            <div className={styles.sectionIntro}>
-              <h2>{t("flywheel.title")}</h2>
-              <p>{t("flywheel.lead", { token })}</p>
-            </div>
-            <div className={styles.feeSplit}>
-              <article>
-                <strong>70%</strong>
-                <h3>{t("flywheel.retained.title")}</h3>
-                <p>{t("flywheel.retained.body")}</p>
-              </article>
-              <article className={styles.buybackShare}>
-                <strong>20%</strong>
-                <h3>{t("flywheel.buyback.title", { token })}</h3>
-                <p>{t("flywheel.buyback.body", { token })}</p>
-              </article>
-              <article>
-                <strong>10%</strong>
-                <h3>{t("flywheel.treasury.title")}</h3>
-                <p>{t("flywheel.treasury.body")}</p>
-              </article>
-            </div>
-            <div className={styles.flywheelFlow}>
-              <div>
-                <Coins size={22} aria-hidden="true" />
-                <span>{t("flywheel.flow.fees")}</span>
-              </div>
-              <ArrowRight size={18} aria-hidden="true" />
-              <div>
-                <RefreshCw size={22} aria-hidden="true" />
-                <span>{t("flywheel.flow.buybacks")}</span>
-              </div>
-              <ArrowRight size={18} aria-hidden="true" />
-              <div>
-                <Flame size={22} aria-hidden="true" />
-                <span>{t("flywheel.flow.burn", { token })}</span>
-              </div>
-              <ArrowRight size={18} aria-hidden="true" />
-              <div>
-                <Sparkles size={22} aria-hidden="true" />
-                <span>{t("flywheel.flow.supply")}</span>
-              </div>
             </div>
           </section>
 
@@ -168,8 +130,11 @@ export default async function DocsPage() {
             <div className={styles.sectionLabel}>{t("oracles.label")}</div>
             <div className={styles.sectionIntro}>
               <h2>{t("oracles.title")}</h2>
-              <p>{t("oracles.lead", { brand })}</p>
+              <p>{t("oracles.lead")}</p>
             </div>
+            <DocsFigure n="11" caption={t("fig.oracles")}>
+              <OracleArt />
+            </DocsFigure>
             <div className={styles.oraclePanel}>
               <div className={styles.oracleBadge}>
                 <RadioTower size={32} aria-hidden="true" />
@@ -209,11 +174,40 @@ export default async function DocsPage() {
             </div>
           </section>
 
+          <ThreeStep id="portfolio" prefix="portfolio" t={t} figure={<DocsFigure n="12" caption={t("fig.portfolio")}><PortfolioArt /></DocsFigure>} />
+          <ThreeStep id="trade" prefix="trade" t={t} figure={<DocsFigure n="13" caption={t("fig.trade")}><TradeArt /></DocsFigure>} />
+
           <section className={styles.section} id="contracts">
             <div className={styles.sectionLabel}>{t("contracts.label")}</div>
             <div className={styles.sectionIntro}>
               <h2>{t("contracts.title")}</h2>
-              <p>{t("contracts.lead", { count: CONTRACTS.length })}</p>
+              <p>{t("contracts.lead")}</p>
+            </div>
+            <DocsFigure n="14" caption={t("fig.contracts")}>
+              <ContractsArt />
+            </DocsFigure>
+            <div className={styles.contractHeader}>
+              <span>{t("contracts.col.vault")}</span>
+              <span>{t("contracts.col.address")}</span>
+              <span>{t("contracts.col.source")}</span>
+            </div>
+            <div className={styles.contractList}>
+              {PROTOCOL_CONTRACTS.map((c) => (
+                <div className={styles.contractRow} key={c.id}>
+                  <strong>{c.label}</strong>
+                  {c.address ? (
+                    <a className={styles.address} href={explorerAddress(c.address)} target="_blank" rel="noreferrer">
+                      {c.address}
+                    </a>
+                  ) : (
+                    <span className={styles.address}>—</span>
+                  )}
+                  <span className={styles.verified}>{c.status === "configured" ? t("contracts.verified") : t("contracts.unpublished")}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.sectionIntro} style={{ marginTop: 28 }}>
+              <p>{t("contracts.ponsLead")}</p>
             </div>
             <div className={styles.contractHeader}>
               <span>{t("contracts.col.vault")}</span>
@@ -221,174 +215,179 @@ export default async function DocsPage() {
               <span>{t("contracts.col.source")}</span>
             </div>
             <div className={styles.contractList}>
-              {CONTRACTS.map((c) => (
+              {PONS_CONTRACTS.map((c) => (
+                <div className={styles.contractRow} key={c.id}>
+                  <strong>{c.label}</strong>
+                  {c.address ? (
+                    <a className={styles.address} href={explorerAddress(c.address)} target="_blank" rel="noreferrer">
+                      {c.address}
+                    </a>
+                  ) : (
+                    <span className={styles.address}>—</span>
+                  )}
+                  <span className={styles.verified}>{t("contracts.verified")}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.sectionIntro} style={{ marginTop: 28 }}>
+              <p>{t("contracts.stockLead")}</p>
+            </div>
+            <div className={styles.contractHeader}>
+              <span>{t("contracts.col.vault")}</span>
+              <span>{t("contracts.col.address")}</span>
+              <span>{t("contracts.col.source")}</span>
+            </div>
+            <div className={styles.contractList}>
+              {markets.map((c) => (
                 <div className={styles.contractRow} key={c.symbol}>
                   <strong>{c.symbol}</strong>
-                  <a className={styles.address} href={`${explorerAddress(c.vault)}?tab=contract`} target="_blank" rel="noreferrer" aria-label={t("contracts.explorerAria", { symbol: c.symbol })}>
-                    <span className={styles.fullAddress}>{c.vault}</span>
-                    <span className={styles.shortAddress}>
-                      {c.vault.slice(0, 8)}…{c.vault.slice(-6)}
-                    </span>
-                    <ArrowUpRight size={14} aria-hidden="true" />
-                  </a>
-                  <a className={styles.verified} href={`https://repo.sourcify.dev/4663/${c.vault}`} target="_blank" rel="noreferrer" aria-label={t("contracts.sourcifyAria", { symbol: c.symbol })}>
-                    <Check size={13} aria-hidden="true" /> {t("contracts.verified")}
-                  </a>
+                  {c.deployment ? (
+                    <a className={styles.address} href={explorerToken(c.deployment.contractAddress)} target="_blank" rel="noreferrer">
+                      {c.deployment.contractAddress}
+                    </a>
+                  ) : (
+                    <span className={styles.address}>—</span>
+                  )}
+                  <span className={styles.verified}>{c.deployment ? t("contracts.verified") : t("contracts.notDeployed")}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.sectionIntro} style={{ marginTop: 28 }}>
+              <p>{t("contracts.marketsLead", { count: MARKETS.length })}</p>
+            </div>
+            <div className={styles.contractHeader}>
+              <span>{t("contracts.col.vault")}</span>
+              <span>{t("contracts.col.address")}</span>
+              <span>{t("contracts.col.source")}</span>
+            </div>
+            <div className={styles.contractList}>
+              {MARKETS.map((c) => (
+                <div className={styles.contractRow} key={c.symbol}>
+                  <strong>{c.symbol}</strong>
+                  <span className={styles.address}>—</span>
+                  <span className={styles.verified}>{t("contracts.notDeployed")}</span>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className={styles.section} id="source">
-            <div className={styles.sectionLabel}>{t("source.label")}</div>
+          <section className={styles.section} id="risks">
+            <div className={styles.sectionLabel}>{t("risks.label")}</div>
             <div className={styles.sectionIntro}>
-              <h2>{t("source.title")}</h2>
-              <p>{t("source.lead", { brand })}</p>
+              <h2>{t("risks.title")}</h2>
+              <p>{t("risks.lead")}</p>
             </div>
+            <DocsFigure n="15" caption={t("fig.risks")}>
+              <RisksArt />
+            </DocsFigure>
             <div className={styles.safeguardGrid}>
-              <article>
-                <Bot size={22} aria-hidden="true" />
-                <h3>{t("source.reads.title")}</h3>
-                <p>
-                  {t("source.reads.body")}{" "}
-                  <a href={`${BRAND.repoUrl}/blob/${BRAND.repoBranch}/src/lib/managed-vault.ts`} target="_blank" rel="noreferrer">
-                    src/lib/managed-vault.ts ↗
-                  </a>
-                </p>
-              </article>
-              <article>
-                <Route size={22} aria-hidden="true" />
-                <h3>{t("source.deposits.title")}</h3>
-                <p>
-                  {t("source.deposits.body")}{" "}
-                  <a href={`${BRAND.repoUrl}/blob/${BRAND.repoBranch}/src/components/strategies/BasketStrategy.tsx`} target="_blank" rel="noreferrer">
-                    src/components/strategies ↗
-                  </a>
-                </p>
-              </article>
-              <article>
-                <ShieldCheck size={22} aria-hidden="true" />
-                <h3>{t("source.verification.title")}</h3>
-                <p>
-                  {t("source.verification.before")}
-                  <Link href="/verify">/verify</Link>
-                  {t("source.verification.after")}{" "}
-                  <a href={`${BRAND.repoUrl}/blob/${BRAND.repoBranch}/scripts/verify.ts`} target="_blank" rel="noreferrer">
-                    scripts/verify.ts ↗
-                  </a>
-                </p>
-              </article>
-              <article>
-                <RadioTower size={22} aria-hidden="true" />
-                <h3>{t("source.intelligence.title")}</h3>
-                <p>
-                  {t("source.intelligence.body")}{" "}
-                  <a href={`${BRAND.repoUrl}/blob/${BRAND.repoBranch}/src/server/intelligence.ts`} target="_blank" rel="noreferrer">
-                    src/server/intelligence.ts ↗
-                  </a>
-                </p>
-              </article>
-            </div>
-            <div className={styles.codeGrid}>
-              <figure className={styles.codeBlock}>
-                <figcaption>scripts/verify.ts · {t("source.code.feeSplit")}</figcaption>
-                <pre>{`const [g0, g1, p0, p1, b0, b1] = await Promise.all([
-  read("grossFees", 0n), read("grossFees", 1n),
-  read("protocolFees", 0n), read("protocolFees", 1n),
-  read("buybackFees", 0n), read("buybackFees", 1n),
-]);
-const buyback = pct(b0, g0);   // 20%
-const treasury = pct(p0, g0);  // 10%
-const ok = Math.abs(buyback - CLAIM.buyback) <= 0.5
-  && Math.abs(treasury - CLAIM.treasury) <= 0.5;`}</pre>
-              </figure>
-              <figure className={styles.codeBlock}>
-                <figcaption>src/server/intelligence.ts · {t("source.code.range")}</figcaption>
-                <pre>{`const rangePosition = (price - lower) / (upper - lower); // 0 → lower bound, 1 → upper
-if (inRange === false) flags.push("out of range");
-else if (rangePosition < 0.15 || rangePosition > 0.85)
-  flags.push(rangePosition < 0.15 ? "near lower bound" : "near upper bound");
-if (oracleAgeSeconds > 26 * 3600) flags.push("oracle stale");`}</pre>
-              </figure>
-            </div>
-            <div className={styles.codeGrid}>
-              <figure className={styles.codeBlock}>
-                <figcaption>{t("source.code.run")}</figcaption>
-                <pre>{`git clone ${BRAND.repoUrl}.git vertex
-cd vertex && npm install
-npm run dev        # the site on http://localhost:3000
-npm run verify     # the same checks /verify publishes`}</pre>
-              </figure>
-              <div className={styles.codeNote}>
-                <h3>{t("source.find.title")}</h3>
-                <p>{t("source.find.body")}</p>
-                <a className="btn btn-primary" href={BRAND.repoUrl} target="_blank" rel="noreferrer">
-                  {t("source.find.cta")} <ArrowUpRight size={16} aria-hidden="true" />
-                </a>
-              </div>
-            </div>
-          </section>
-
-          <section className={styles.section} id="roadmap">
-            <div className={styles.sectionLabel}>{t("roadmap.label")}</div>
-            <div className={styles.sectionIntro}>
-              <h2>{t("roadmap.title")}</h2>
-              <p>{t("roadmap.lead")}</p>
-            </div>
-            <div className={styles.roadmap}>
-              {roadmap.map(({ n, id, icon }) => (
+              {([1, 2, 3, 4] as const).map((n) => (
                 <article key={n}>
-                  <div className={styles.roadmapMarker}>{icon === "bot" ? <Bot size={20} aria-hidden="true" /> : <Sparkles size={20} aria-hidden="true" />}</div>
-                  <div>
-                    <span>
-                      {n} · {t(`roadmap.${id}.stage`)}
-                    </span>
-                    <h3>{t(`roadmap.${id}.title`)}</h3>
-                    <p>{t(`roadmap.${id}.body`)}</p>
-                  </div>
+                  <ShieldCheck size={22} aria-hidden="true" />
+                  <h3>{t(`risks.${n}.title`)}</h3>
+                  <p>{t(`risks.${n}.body`)}</p>
                 </article>
               ))}
             </div>
           </section>
 
+          <section className={styles.section} id="supported">
+            <div className={styles.sectionLabel}>{t("supported.label")}</div>
+            <div className={styles.sectionIntro}>
+              <h2>{t("supported.title")}</h2>
+              <p>{t("supported.lead")}</p>
+            </div>
+            <div className={styles.contractList}>
+              {markets.map((c) => (
+                <div className={styles.contractRow} key={c.symbol}>
+                  <strong>{c.symbol}</strong>
+                  <span className={styles.address}>{c.name ?? c.symbol}</span>
+                  <span className={styles.verified}>USDG</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <ThreeStep id="chain" prefix="chain" t={t} />
+
           <section className={styles.section} id="faq">
             <div className={styles.sectionLabel}>{t("faq.label")}</div>
             <div className={styles.faq}>
-              <details>
-                <summary>{t("faq.1.q")}</summary>
-                <p>{t("faq.1.a")}</p>
-              </details>
-              <details>
-                <summary>{t("faq.2.q")}</summary>
-                <p>{t("faq.2.a")}</p>
-              </details>
-              <details>
-                <summary>{t("faq.3.q")}</summary>
-                <p>{t("faq.3.a")}</p>
-              </details>
-              <details>
-                <summary>{t("faq.4.q", { token })}</summary>
-                <p>{t("faq.4.a", { token })}</p>
-              </details>
-              <details>
-                <summary>{t("faq.5.q")}</summary>
-                <p>{t("faq.5.a")}</p>
-              </details>
-              <details>
-                <summary>{t("faq.6.q")}</summary>
-                <p>
-                  {t("faq.6.before")}
-                  <a href={BRAND.xUrl} target="_blank" rel="noreferrer">
-                    @{BRAND.xHandle}
-                  </a>
-                  {t("faq.6.after")}
-                </p>
-              </details>
+              {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const).map((n) => (
+                <details key={n}>
+                  <summary>{t(`faq.${n}.q`)}</summary>
+                  <p>{t(`faq.${n}.a`)}</p>
+                </details>
+              ))}
             </div>
           </section>
         </article>
       </div>
       <SiteFooter />
     </main>
+  );
+}
+
+function ThreeStep({
+  id,
+  prefix,
+  t,
+  figure,
+}: {
+  id: string;
+  prefix: string;
+  t: Awaited<ReturnType<typeof getT>>;
+  figure?: ReactNode;
+}) {
+  return (
+    <section className={styles.section} id={id}>
+      <div className={styles.sectionLabel}>{t(`${prefix}.label`)}</div>
+      <div className={styles.sectionIntro}>
+        <h2>{t(`${prefix}.title`)}</h2>
+        <p>{t(`${prefix}.lead`)}</p>
+      </div>
+      {figure}
+      <div className={styles.steps}>
+        {([1, 2, 3] as const).map((n) => (
+          <article key={n}>
+            <span>{n}</span>
+            <h3>{t(`${prefix}.${n}.title`)}</h3>
+            <p>{t(`${prefix}.${n}.body`)}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FourStep({
+  id,
+  prefix,
+  t,
+  figure,
+}: {
+  id: string;
+  prefix: string;
+  t: Awaited<ReturnType<typeof getT>>;
+  figure?: ReactNode;
+}) {
+  return (
+    <section className={styles.section} id={id}>
+      <div className={styles.sectionLabel}>{t(`${prefix}.label`)}</div>
+      <div className={styles.sectionIntro}>
+        <h2>{t(`${prefix}.title`)}</h2>
+        <p>{t(`${prefix}.lead`)}</p>
+      </div>
+      {figure}
+      <div className={styles.steps}>
+        {([1, 2, 3, 4] as const).map((n) => (
+          <article key={n}>
+            <span>{n}</span>
+            <h3>{t(`${prefix}.step${n}.title`)}</h3>
+            <p>{t(`${prefix}.step${n}.body`)}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }

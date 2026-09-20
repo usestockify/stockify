@@ -1,5 +1,5 @@
 /*
- * Vertex service worker.
+ * Stockify service worker.
  *
  * Every figure on this site is a live chain read, so nothing that carries data is
  * ever served from cache: API responses and the RPC relay always go to the network
@@ -7,7 +7,7 @@
  * app shell and build assets available so an installed app opens instantly and can
  * show an honest offline screen instead of a browser error.
  */
-const VERSION = "vertex-v1";
+const VERSION = "stockify-v1";
 const SHELL = `${VERSION}-shell`;
 const OFFLINE_URL = "/offline.html";
 

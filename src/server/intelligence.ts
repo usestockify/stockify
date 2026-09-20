@@ -231,7 +231,7 @@ export function answerGuided(s: IntelligenceSignals, id: GuidedId): string {
     }
     case "fees": {
       const xs = vs.filter((v) => v.lifetimeFees !== null).sort((a, b) => b.lifetimeFees! - a.lifetimeFees!).slice(0, 5);
-      return `Gross trading fees since launch: ${list(xs.map((v) => `${v.symbol} $${v.lifetimeFees!.toFixed(2)}`))}. Across all vaults that is ${money(s.totals.lifetimeFees)}; 70% of claimed fees stays with vault participants, 20% funds the buyback and 10% goes to the treasury.`;
+      return `Gross trading fees since launch: ${list(xs.map((v) => `${v.symbol} $${v.lifetimeFees!.toFixed(2)}`))}. Across all vaults that is ${money(s.totals.lifetimeFees)}. Fee figures are observations; no buyback or treasury split is claimed.`;
     }
     case "oracle": {
       const xs = vs.filter((v) => v.oracleAgeSeconds !== null).sort((a, b) => b.oracleAgeSeconds! - a.oracleAgeSeconds!).slice(0, 4);
@@ -258,7 +258,7 @@ export function answerGuided(s: IntelligenceSignals, id: GuidedId): string {
 
 export const analystOnline = () => Boolean(process.env.ANTHROPIC_API_KEY);
 
-const SYSTEM = `You are the ${BRAND.name} analyst. ${BRAND.name} runs 18 managed liquidity vaults for tokenized stocks on Robinhood Chain (one vault per stock, paired with USDG), a USDG lending market backed by META vault shares, and a basket strategy. You receive a JSON snapshot of live signals read from the chain a moment ago.
+const SYSTEM = `You are the ${BRAND.name} analyst. ${BRAND.name} is USDG liquidity infrastructure for tokenized stock markets on Robinhood Chain. You receive a JSON snapshot of live signals read from the chain a moment ago.
 
 Rules:
 - Use only the numbers in the snapshot. Never invent figures, events, or news. If something is not in the data, say it is not observed.

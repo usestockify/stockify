@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Vertex design system · blueprint grid, hex buttons, rulers and hatching.
+   stockify design system · blueprint grid, hex buttons, rulers and hatching.
    Loaded after globals.css so it wins on shared selectors.
    ========================================================================== */
 
@@ -52,7 +52,7 @@ a:hover {
 }
 ::selection {
   background: var(--green);
-  color: #000;
+  color: var(--fog);
 }
 .mono,
 .eyebrow,
@@ -442,7 +442,7 @@ img {
 }
 .hex-green {
   --hex-bg: var(--green);
-  --hex-fg: #000;
+  --hex-fg: var(--fog);
 }
 .hex-lavender {
   --hex-bg: var(--lavender);
@@ -522,11 +522,11 @@ img {
 }
 .btn-light {
   background: var(--green);
-  color: #000;
+  color: var(--fog);
 }
 .btn-light:hover {
   background: var(--green);
-  color: #000;
+  color: var(--fog);
 }
 .btn-ghost,
 .btn-outline-dark {
@@ -954,19 +954,47 @@ hr.g-hr-soft {
   color: var(--slate);
   text-decoration: none;
 }
-.gh-logo svg {
+.gh-logo svg,
+.gh-logo img {
   width: 36px;
   height: 36px;
   transition: color 0.15s;
 }
-.gh-logo:hover svg {
-  color: var(--green);
+.brand-logo-slot {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.brand-logo-slot[data-circle="true"] {
+  border-radius: 50%;
+  background: var(--slate);
+}
+.brand-logo-slot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: 50% 50%;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.gh-logo:hover .brand-logo-slot img {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-slot img {
+    transition: none;
+  }
+  .gh-logo:hover .brand-logo-slot img {
+    transform: none;
+  }
 }
 .gh-wordmark {
   font-family: var(--anybody);
   font-weight: 700;
   font-size: 22px;
   letter-spacing: -0.04em;
+  text-transform: lowercase;
 }
 .gh-nav {
   display: none;
@@ -1011,7 +1039,7 @@ hr.g-hr-soft {
 }
 .gh-link[aria-current="page"] {
   background: var(--green);
-  color: #000;
+  color: var(--fog);
 }
 .gh-menu {
   position: relative;
@@ -1085,7 +1113,8 @@ hr.g-hr-soft {
   font-size: 12px;
   opacity: 0.7;
 }
-.gh-dropdown .gh-badge {
+.gh-dropdown .gh-badge,
+.gh-mobile .gh-badge {
   margin-left: 6px;
   padding: 1px 8px;
   border-radius: var(--radius-pill);
@@ -1095,20 +1124,30 @@ hr.g-hr-soft {
   text-transform: uppercase;
   background: var(--neon);
   color: var(--slate);
+  vertical-align: middle;
+}
+.gh-dropdown-label {
+  display: block;
+  padding: 10px 10px 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.gh-dropdown a[data-soon] {
+  opacity: 0.78;
+}
+.gh-badge-soon {
+  background: color-mix(in srgb, var(--slate) 12%, var(--fog)) !important;
+  color: var(--slate) !important;
 }
 .gh-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.gh-actions .hex-group {
-  display: none;
-}
 @media (min-width: 1024px) {
-  .gh-actions .hex-group {
-    display: inline-flex;
-  }
-
   .gh-actions > .gh-mobile-only {
     display: none;
   }
@@ -1302,7 +1341,7 @@ hr.g-hr-soft {
 .gf-col a:hover,
 .gf-link:hover {
   background: var(--green);
-  color: #000;
+  color: var(--fog);
 }
 .gf-status {
   display: inline-flex;
@@ -1403,7 +1442,7 @@ hr.g-hr-soft {
 }
 .gf-mobile-grid a:hover {
   background: var(--green);
-  color: #000;
+  color: var(--fog);
 }
 .gf-cubes-wrap {
   overflow: hidden;
@@ -1754,13 +1793,13 @@ a.stat-card:hover,
   border: 0 !important;
   border-radius: var(--radius-pill) !important;
   background: var(--green);
-  color: #000;
+  color: var(--fog);
   font-family: var(--anybody);
   font-size: 15px;
   font-weight: 500;
 }
 .error-page > a:hover {
-  color: #000;
+  color: var(--fog);
 }
 
 
@@ -1862,7 +1901,7 @@ textarea:focus-visible {
 }
 .ca-button:hover { background: rgba(197, 255, 214, 0.45); transform: translateY(-1px); box-shadow: var(--shadow-card); }
 .ca-button:active { transform: translateY(0) scale(0.98); box-shadow: none; }
-.ca-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 6px; background: var(--green); color: #000; }
+.ca-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 6px; background: var(--green); color: var(--fog); }
 .ca-addr { font-family: var(--code); font-size: 12px; letter-spacing: 0.01em; }
 .ca-copied { font-size: 12px; color: var(--accent); }
 .ca-copied:empty { display: none; }

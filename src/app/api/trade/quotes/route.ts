@@ -15,8 +15,9 @@ export async function GET(req: Request) {
   if (!ok(tokenIn) || !ok(tokenOut) || !/^\d{1,78}$/.test(amountIn) || BigInt(amountIn) <= 0n) {
     return NextResponse.json({ error: "Invalid quote request" }, { status: 400 });
   }
+  const recipient = url.searchParams.get("recipient") ?? "";
   try {
-    return NextResponse.json({ data: await collectQuotes(tokenIn, tokenOut, amountIn) }, { headers: { "cache-control": "no-store" } });
+    return NextResponse.json({ data: await collectQuotes(tokenIn, tokenOut, amountIn, recipient) }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Quotes are temporarily unavailable." }, { status: 503 });
   }

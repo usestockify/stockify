@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getT } from "@/i18n/server";
 import { BRAND } from "@/lib/brand";
-import { EXPLORER_URL } from "@/lib/chain";
+import { explorerBlock } from "@/lib/chain";
 import { formatUtc } from "@/lib/format";
 import type { VerificationReport, VerificationStatus } from "@/lib/verification";
 import report from "../../../public/verification/latest.json";
@@ -13,7 +13,7 @@ import styles from "@/styles/verify.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("verify");
-  return { title: `${t("meta.title")} · ${BRAND.name}`, description: t("meta.description", { brand: BRAND.name }) };
+  return { title: t("meta.title"), description: t("meta.description", { brand: BRAND.titleName }) };
 }
 
 const data = report as VerificationReport;
@@ -65,7 +65,7 @@ export default async function VerifyPage() {
               <div>
                 <span>{t("meta.chainHead")}</span>
                 <strong>
-                  <a href={`${EXPLORER_URL}/block/${data.chain.head}`} target="_blank" rel="noopener noreferrer">
+                  <a href={explorerBlock(data.chain.head)} target="_blank" rel="noopener noreferrer">
                     {t("meta.block", { block: data.chain.head })}
                   </a>
                 </strong>
@@ -168,8 +168,8 @@ export default async function VerifyPage() {
             </p>
           </div>
           <pre>
-            <b>$</b> git clone https://github.com/pablooalonnso-web/claudemaxing5.git vertex{"\n"}
-            <b>$</b> cd vertex && npm install{"\n"}
+            <b>$</b> git clone https://github.com/pablooalonnso-web/claudemaxing5.git stockify{"\n"}
+            <b>$</b> cd stockify && npm install{"\n"}
             <b>$</b> npm run verify{"\n"}
             {"\n"}
             <b>#</b> {t("repro.comment.chainOnly")}{"\n"}

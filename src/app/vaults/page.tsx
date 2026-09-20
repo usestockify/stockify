@@ -8,7 +8,7 @@ import "@/styles/vaults.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("vaults");
-  return { title: `${t("meta.title")} · ${BRAND.name}` };
+  return { title: t("meta.title") };
 }
 
 export default function VaultsPage() {
@@ -16,7 +16,7 @@ export default function VaultsPage() {
     <main className="app-page">
       <SiteHeader />
       <div className="vaults-page vaults-directory masthead-page">
-        <VaultTable />
+        <VaultTable variant="vaults" />
       </div>
       <SiteFooter />
     </main>

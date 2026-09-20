@@ -11,9 +11,10 @@ import { useWallet } from "@/components/wallet/WalletProvider";
 import { useT } from "@/i18n/client";
 import { erc20Abi, managedVaultAbi } from "@/lib/abis";
 import { BRAND } from "@/lib/brand";
-import { explorerAddress, explorerTx, publicClient, robinhoodChain, TOKEN_ADDRESS, USDG_ADDRESS } from "@/lib/chain";
+import { explorerAddress, explorerTx, publicClient, robinhoodChain, PROTOCOL_TOKEN_LIVE, TOKEN_ADDRESS, USDG_ADDRESS } from "@/lib/chain";
 import { describeTxError } from "@/lib/managed-vault";
 import type { VaultPin } from "@/lib/registry";
+import type { WalletPosition } from "@/lib/wallet/types";
 
 const money = (raw: bigint) => Number(formatUnits(raw, 6)).toLocaleString(undefined, { style: "currency", currency: "USD" });
 const amount = (raw: bigint | null, decimals: number) => (raw === null ? "–" : Number(formatUnits(raw, decimals)).toLocaleString(undefined, { maximumFractionDigits: decimals > 6 ? 6 : decimals }));
@@ -238,7 +239,7 @@ function TransferForm({ owner, onTransferred }: { owner: Address; onTransferred:
           >
             <option value="ETH">{t("transfer.opt.eth")}</option>
             <option value="USDG">{t("transfer.opt.usdg")}</option>
-            <option value="TOKEN">{t("transfer.opt.brand", { brand: BRAND.name })}</option>
+            {PROTOCOL_TOKEN_LIVE ? <option value="TOKEN">{t("transfer.opt.brand", { brand: BRAND.name })}</option> : null}
             <option value="custom">{t("transfer.opt.custom")}</option>
           </select>
         </label>
@@ -343,8 +344,8 @@ function TransferForm({ owner, onTransferred }: { owner: Address; onTransferred:
 
 export function WalletPortfolio() {
   const t = useT("portfolio");
-  const { ready, address, connect, disconnect, available, error: walletError } = useWallet();
-  const [balances, setBalances] = useState<{ usdg: bigint | null; token: bigint | null; native: bigint | null; tokenDecimals: number }>({ usdg: null, token: null, native: null, tokenDecimals: 18 });
+  const { ready, address, connect, disconnect, available, error: walletError, network, switchChain, onTargetChain } = useWallet();
+  const [positions, setPositions] = useState<WalletPosition[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [balanceError, setBalanceError] = useState("");
   const [copied, setCopied] = useState(false);
@@ -353,15 +354,10 @@ export function WalletPortfolio() {
     if (!address) return;
     setRefreshing(true);
     try {
-      const client = publicClient();
-      const [usdg, token, native, tokenDecimals] = await Promise.all([
-        client.readContract({ address: USDG_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [address] }),
-        client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [address] }).catch(() => null),
-        client.getBalance({ address }),
-        client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "decimals" }).catch(() => 18),
-      ]);
-      setBalances({ usdg, token, native, tokenDecimals });
-      setBalanceError("");
+      const res = await fetch(`/api/wallet/positions?owner=${address}`, { cache: "no-store" });
+      const json = (await res.json()) as { data?: WalletPosition[]; error?: string };
+      setPositions(json.data ?? []);
+      setBalanceError(json.error ?? "");
     } catch {
       setBalanceError(t("wallet.balanceError"));
     } finally {
@@ -444,43 +440,68 @@ export function WalletPortfolio() {
           </button>
         </div>
       </section>
+      {network === "wrong-network" ? (
+        <section className="wallet-empty-state">
+          <div>
+            <p className="eyebrow">{t("wallet.label")}</p>
+            <h2>{t("wallet.wrongNetwork")}</h2>
+            <button className="btn btn-primary" type="button" onClick={() => void switchChain()}>
+              {t("wallet.switchNetwork")}
+            </button>
+          </div>
+        </section>
+      ) : null}
       <section className="wallet-balance-section">
         <div className="wallet-section-heading">
           <div>
             <p className="eyebrow">{t("wallet.balancesEyebrow")}</p>
             <h2>{t("wallet.balancesTitle")}</h2>
           </div>
-          <button className="wallet-refresh" type="button" onClick={() => void refresh()} disabled={refreshing}>
+          <button className="wallet-refresh" type="button" onClick={() => void refresh()} disabled={refreshing || !onTargetChain}>
             <RefreshCw size={15} className={refreshing ? "wallet-spin" : ""} />
             {t("wallet.refresh")}
           </button>
         </div>
         {balanceError ? <p className="wallet-inline-error">{balanceError}</p> : null}
         <div className="wallet-balance-grid">
-          <article>
-            <TokenIcon token="USDG" />
-            <div>
-              <span>USDG</span>
-              <strong className="mono">{amount(balances.usdg, 6)}</strong>
-              <small>{t("wallet.walletBalance")}</small>
-            </div>
-          </article>
-          <article>
-            <TokenIcon token="TOKEN" />
-            <div>
-              <span>{t("wallet.brandToken", { brand: BRAND.name })}</span>
-              <strong className="mono">{amount(balances.token, balances.tokenDecimals)}</strong>
-              <small>{t("wallet.protocolToken")}</small>
-            </div>
-          </article>
-          <article>
-            <TokenIcon token="ETH" />
-            <div>
-              <span>ETH</span>
-              <strong className="mono">{amount(balances.native, 18)}</strong>
-              <small>{t("wallet.gas")}</small>
-            </div>
-          </article>
+          {positions
+            .filter((p) => p.key === "ETH" || p.key === "USDG")
+            .map((p) => (
+              <article key={p.key}>
+                {p.key === "USDG" ? <TokenIcon token="USDG" /> : <TokenIcon token="ETH" />}
+                <div>
+                  <span>{p.symbol}</span>
+                  <strong className="mono">{p.status === "ready" && p.raw != null && p.decimals != null ? amount(BigInt(p.raw), p.decimals) : t("wallet.unavailable")}</strong>
+                  <small>{p.key === "ETH" ? t("wallet.gas") : t("wallet.walletBalance")}</small>
+                </div>
+              </article>
+            ))}
+        </div>
+        <div className="wallet-section-heading" style={{ marginTop: 28 }}>
+          <div>
+            <p className="eyebrow">{t("wallet.protocolToken")}</p>
+            <h2>{t("wallet.stockTokens")}</h2>
+          </div>
+        </div>
+        <div className="wallet-balance-grid">
+          {positions
+            .filter((p) => p.key !== "ETH" && p.key !== "USDG")
+            .map((p) => (
+              <article key={p.key}>
+                <StockLogo symbol={p.symbol} size={36} />
+                <div>
+                  <span>{p.symbol}</span>
+                  <strong className="mono">
+                    {p.status === "ready" && p.raw != null && p.decimals != null ? amount(BigInt(p.raw), p.decimals) : p.status === "unavailable" ? t("wallet.unavailable") : "–"}
+                  </strong>
+                  <small>
+                    {p.ui != null && p.decimals != null
+                      ? `${t("wallet.uiBalance")}: ${amount(BigInt(p.ui), p.decimals)}`
+                      : p.error ?? t("wallet.rawBalance")}
+                  </small>
+                </div>
+              </article>
+            ))}
         </div>
       </section>
       <div className="wallet-workspace">

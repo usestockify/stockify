@@ -1,4 +1,3 @@
-import Image from "next/image";
 import stockTokens from "@/data/stock-tokens.json";
 
 const LOGOS = stockTokens as Record<string, string>;
@@ -7,8 +6,9 @@ export function hasStockLogo(symbol: string) {
   return Boolean(LOGOS[symbol]);
 }
 
-export function StockLogo({ symbol, size = 40 }: { symbol: string; size?: number }) {
-  const src = LOGOS[symbol];
+export function StockLogo({ symbol, size = 40, logoUrl }: { symbol: string; size?: number; logoUrl?: string | null }) {
+  const local = LOGOS[symbol];
+  const src = logoUrl || local;
   if (!src) {
     return (
       <span className="token-logo-fallback" style={{ width: size, height: size, fontSize: Math.max(9, 0.34 * size) }} title={symbol}>
@@ -18,33 +18,12 @@ export function StockLogo({ symbol, size = 40 }: { symbol: string; size?: number
   }
   return (
     <span className="stock-logo-frame" style={{ width: size, height: size }}>
-      <Image className="stock-token-logo" src={src} alt="" width={size} height={size} sizes={`${size}px`} />
+      {/* eslint-disable-next-line @next/next/no-img-element -- small logos; next/image hidden attr hydrates poorly */}
+      <img className="stock-token-logo" src={src} alt="" width={size} height={size} />
     </span>
   );
 }
 
-export const STOCK_NAMES: { symbol: string; name: string }[] = [
-  { symbol: "AAPL", name: "Apple" },
-  { symbol: "GOOGL", name: "Alphabet" },
-  { symbol: "COST", name: "Costco" },
-  { symbol: "MSFT", name: "Microsoft" },
-  { symbol: "NVDA", name: "NVIDIA" },
-  { symbol: "AMZN", name: "Amazon" },
-  { symbol: "META", name: "Meta" },
-  { symbol: "TSLA", name: "Tesla" },
-  { symbol: "INTC", name: "Intel" },
-  { symbol: "MSTR", name: "MicroStrategy" },
-  { symbol: "PLTR", name: "Palantir" },
-  { symbol: "AMD", name: "AMD" },
-  { symbol: "SNDK", name: "SanDisk" },
-  { symbol: "CRCL", name: "Circle" },
-  { symbol: "GME", name: "GameStop" },
-  { symbol: "MU", name: "Micron" },
-  { symbol: "SPCX", name: "SPCX" },
-  { symbol: "QQQ", name: "QQQ" },
-  { symbol: "SPY", name: "SPY" },
-];
-
 export function stockName(symbol: string) {
-  return STOCK_NAMES.find((s) => s.symbol === symbol)?.name ?? symbol;
+  return symbol;
 }

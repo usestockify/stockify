@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { EarningsCalculator } from "@/components/calculator/EarningsCalculator";
 import { getT } from "@/i18n/server";
-import { BRAND } from "@/lib/brand";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("calculator");
-  return { title: `${t("meta.title")} · ${BRAND.name}`, description: t("meta.description") };
+  return { title: t("meta.title"), description: t("meta.description") };
 }
 
 export default async function CalculatorPage() {
@@ -29,7 +27,6 @@ export default async function CalculatorPage() {
           </div>
         </div>
       </section>
-      <EarningsCalculator />
       <SiteFooter />
     </main>
   );

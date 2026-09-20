@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ZapFlow } from "@/components/zap/ZapFlow";
 import { getT } from "@/i18n/server";
-import { BRAND } from "@/lib/brand";
 import "@/styles/strategies.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("zap");
   return {
-    title: `${t("meta.title")} · ${BRAND.name}`,
+    title: t("meta.title"),
     description: t("meta.description"),
   };
 }
@@ -34,7 +32,6 @@ export default async function ZapPage() {
         </div>
       </section>
       <div className="strategies-page">
-        <ZapFlow />
         <section className="strategy-notes" aria-label={t("notes.aria")}>
           <div>
             <h3>{t("notes.doesTitle")}</h3>

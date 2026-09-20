@@ -8,8 +8,21 @@ import { useT } from "@/i18n/client";
 
 export function WalletConnectButton({ large = false }: { large?: boolean }) {
   const t = useT("wallet");
-  const { ready, address, connect, connecting } = useWallet();
+  const { ready, address, connect, connecting, network, switchChain } = useWallet();
   const label = address ? shortAddress(address) : t("connect");
+  if (ready && address && network === "wrong-network") {
+    return (
+      <button
+        className={`wallet-button${large ? " wallet-button-large" : ""}`}
+        type="button"
+        onClick={() => void switchChain()}
+        title={t("wrongNetwork")}
+      >
+        <Wallet size={large ? 18 : 16} strokeWidth={1.5} />
+        {t("switchNetwork")}
+      </button>
+    );
+  }
   if (ready && address) {
     return (
       <Link

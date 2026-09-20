@@ -75,6 +75,12 @@ export function ProtocolVaultProvider({ children }: { children: ReactNode }) {
   const singles = directoryVaults();
 
   useEffect(() => {
+    if (singles.length === 0) {
+      setSnapshot({ observedAt: Date.now(), block: "0", rows: [] });
+      setRows([]);
+      setError(false);
+      return;
+    }
     let alive = true;
     let busy = false;
     const refresh = async () => {

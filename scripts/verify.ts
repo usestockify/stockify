@@ -1,13 +1,11 @@
 /**
- * Vertex verification run.
+ * Stockify verification run.
  *
- * Exercises the live contracts on Robinhood Chain and the production site the
- * same way the app does, without sending a transaction. Every deposit and
- * withdrawal is an eth_call simulation: a throwaway account is given a USDG
- * (or vault share) allowance and balance through state overrides so the
- * router can be executed end to end inside the node. Nothing is signed.
+ * Exercises configured contracts on Robinhood Chain and the production site the
+ * same way the app does, without sending a transaction. Unpublished Stockify
+ * roles are skipped. Nothing is signed.
  *
- *   npm run verify                       # chain + site (usevertex.xyz)
+ *   npm run verify                       # chain + site
  *   npm run verify -- --site http://localhost:3000
  *   npm run verify -- --no-site          # chain only
  *   npm run verify -- --build            # also run typecheck and lint
@@ -20,7 +18,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { createPublicClient, encodeAbiParameters, formatUnits, http, keccak256, pad, parseUnits, toHex, type Address, type Hex, type PublicClient } from "viem";
 import { erc20Abi, managedPositionAbi, managedRouterAbi, managedValuationAbi, managedVaultAbi } from "@/lib/abis";
 import { BRAND } from "@/lib/brand";
-import { BURN_ADDRESS, robinhoodChain, TOKEN_ADDRESS, USDG_ADDRESS } from "@/lib/chain";
+import { BURN_ADDRESS, PROTOCOL_TOKEN_LIVE, robinhoodChain, TOKEN_ADDRESS, USDG_ADDRESS } from "@/lib/chain";
 import { buildDepositQuote, readManagedState, swapSqrtLimit } from "@/lib/managed-vault";
 import { LENDING_MARKETS, MANAGED_VAULTS, VAULT_PINS, type ManagedVaultRegistryEntry } from "@/lib/registry";
 import { getLendingMarkets, getLendingPosition } from "@/server/lending";
@@ -41,7 +39,7 @@ const OUT = opt("--out", "public/verification/latest.json");
 
 const TEST_ACCOUNT = BURN_ADDRESS as Address; // never holds a key; only used inside eth_call simulations
 const DEPOSIT_USDG = parseUnits("100", 6);
-/** The split the site describes; the fee counters on every vault are checked against it. */
+/** Unpublished until Stockify vaults publish a fee policy. */
 const CLAIM = { buyback: 20, treasury: 10 };
 const MAX = ("0x" + "f".repeat(64)) as Hex;
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
@@ -140,17 +138,26 @@ async function main() {
     ]);
     return { status: symbol === "USDG" && decimals === 6 ? "pass" : "fail", detail: `${symbol}, ${decimals} decimals at ${short(USDG_ADDRESS)}` };
   });
-  await check(con, `${BRAND.name} token`, async () => {
-    const [name, symbol, decimals, supply, burned] = await Promise.all([
-      client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "name" }),
-      client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "symbol" }),
-      client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "decimals" }),
-      client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "totalSupply" }),
-      client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [BURN_ADDRESS] }),
-    ]);
-    return { detail: `${name} (${symbol}), ${decimals} decimals, supply ${Number(formatUnits(supply, decimals)).toLocaleString("en-US")}, ${formatUnits(burned, decimals)} at the burn address` };
-  });
-  await check(con, "Registry", async () => ({ status: LIVE.length === 18 ? "pass" : "fail", detail: `${LIVE.length} of ${VAULT_PINS.length} pinned vaults resolve to a version 7 registry entry (${MANAGED_VAULTS.length} entries in total)` }));
+  if (PROTOCOL_TOKEN_LIVE) {
+    await check(con, `${BRAND.name} token`, async () => {
+      const [name, symbol, decimals, supply, burned] = await Promise.all([
+        client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "name" }),
+        client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "symbol" }),
+        client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "decimals" }),
+        client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "totalSupply" }),
+        client.readContract({ address: TOKEN_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [BURN_ADDRESS] }),
+      ]);
+      return { detail: `${name} (${symbol}), ${decimals} decimals, supply ${Number(formatUnits(supply, decimals)).toLocaleString("en-US")}, ${formatUnits(burned, decimals)} at the burn address` };
+    });
+  } else {
+    await check(con, `${BRAND.name} token`, async () => ({ status: "skip", detail: "Not configured. No protocol ticker is published." }));
+  }
+  await check(con, "Registry", async () => ({
+    status: VAULT_PINS.length === 0 ? "skip" : LIVE.length === VAULT_PINS.length ? "pass" : "fail",
+    detail: VAULT_PINS.length === 0
+      ? "No Stockify vaults are published. Registry stays Not configured."
+      : `${LIVE.length} of ${VAULT_PINS.length} pinned vaults resolve to a registry entry (${MANAGED_VAULTS.length} entries in total)`,
+  }));
   for (const { pin, entry } of LIVE) {
     await check(con, `${pin.symbol} wiring`, async () => {
       const v = { address: entry.vault as Address, abi: managedVaultAbi } as const;
@@ -374,8 +381,13 @@ async function main() {
   const tok = group(
     "token",
     "Token and liquidity",
-    "Where the VERTEX supply actually sits: the burn address, the wallets the project has used, and the pool. Liquidity on Robinhood Chain lives inside the Uniswap V4 singleton, and a liquidity position is owned by whoever holds it; these checks read the project's own wallets so anyone can confirm what they do and do not control.",
+    PROTOCOL_TOKEN_LIVE
+      ? "Where a published protocol token sits onchain."
+      : "No Stockify protocol token is published. Supply checks stay skipped.",
   );
+  if (!PROTOCOL_TOKEN_LIVE) {
+    await check(tok, "Protocol token", async () => ({ status: "skip", detail: "Not configured. No ticker, burn address or team wallets are published." }));
+  } else {
   const TEAM_WALLETS: { label: string; address: Address }[] = [
     { label: "Deployer wallet", address: "0x0Ce9f80e1Ad5698d5F82B1Ce7AD4db4b835556A2" },
     { label: "Buyback wallet", address: "0xBABe28C7325f9549C406a1504B701594D27B5676" },
@@ -440,12 +452,13 @@ async function main() {
     const share = (Number(held) / Number(supply)) * 100;
     return { detail: `${amount(held, 18)} VERTEX (${share.toFixed(2)}% of supply) sits in the Uniswap V4 singleton at ${short(pool)}, which custodies every pool on the chain` };
   });
+  }
 
   // ------------------------------------------------------------------- site
   const site = group("site", "Production site", SITE ? `Pages and APIs served from ${SITE}.` : "Skipped (--no-site).");
   if (SITE) {
-    const get = (path: string, init?: RequestInit) => fetch(SITE + path, { ...init, redirect: "manual", signal: AbortSignal.timeout(60_000), headers: { "user-agent": "vertex-verify", ...(init?.headers ?? {}) } });
-    const pages = ["/", "/vaults", `/vaults/${aapl?.id ?? VAULT_PINS[0].id}`, "/lending", "/lending/meta", "/trade/swap", "/portfolio", "/strategies", "/allocator", "/intelligence", "/docs", "/help", "/help/contact", "/status"];
+    const get = (path: string, init?: RequestInit) => fetch(SITE + path, { ...init, redirect: "manual", signal: AbortSignal.timeout(60_000), headers: { "user-agent": "stockify-verify", ...(init?.headers ?? {}) } });
+    const pages = ["/", "/markets", "/vaults", "/trade/swap", "/portfolio", "/strategies", "/allocator", "/docs", "/status", "/verify"];
     for (const path of pages) {
       await check(site, `GET ${path}`, async () => {
         const r = await get(path);

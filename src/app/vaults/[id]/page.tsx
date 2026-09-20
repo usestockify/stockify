@@ -2,35 +2,33 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ManagedVaultWorkspace } from "@/components/vaults/ManagedVaultWorkspace";
+import { MarketDesk } from "@/components/vaults/MarketDesk";
 import { getT } from "@/i18n/server";
 import { BRAND } from "@/lib/brand";
-import { findVaultById, VAULT_PINS } from "@/lib/registry";
-import "@/styles/vault-detail.css";
+import { STOCKIFY_MARKETS, findMarket } from "@/lib/markets";
+import "@/styles/vaults.css";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
-  const pin = findVaultById(id);
+  const market = findMarket(id);
   const t = await getT("vaults");
-  return { title: pin ? `${t("meta.vaultTitle", { symbol: pin.symbol })} · ${BRAND.name}` : BRAND.name };
+  return { title: market ? t("meta.vaultTitle", { symbol: market.symbol }) : BRAND.titleName };
 }
 
-export const dynamic = "force-dynamic";
-
 export function generateStaticParams() {
-  return VAULT_PINS.map((p) => ({ id: p.id }));
+  return STOCKIFY_MARKETS.map((m) => ({ id: m.slug }));
 }
 
 export default async function VaultPage({ params }: Params) {
   const { id } = await params;
-  const pin = findVaultById(id);
-  if (!pin) notFound();
+  const market = findMarket(id);
+  if (!market) notFound();
   return (
     <div className="app-page">
       <SiteHeader />
-      <ManagedVaultWorkspace pin={pin} />
+      <MarketDesk market={market} />
       <SiteFooter />
     </div>
   );

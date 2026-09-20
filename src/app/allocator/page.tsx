@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import { Allocator } from "@/components/allocator/Allocator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getT } from "@/i18n/server";
-import { BRAND } from "@/lib/brand";
 import "@/styles/strategies.css";
-import "@/styles/allocator.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("allocator");
   return {
-    title: `${t("meta.title")} · ${BRAND.name}`,
+    title: t("meta.title"),
     description: t("meta.description"),
   };
 }
@@ -35,7 +32,6 @@ export default async function AllocatorPage() {
         </div>
       </section>
       <div className="strategies-page">
-        <Allocator />
         <section className="strategy-notes" aria-label={t("notes.aria")}>
           <div>
             <h3>{t("notes.doesTitle")}</h3>

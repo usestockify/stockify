@@ -11,7 +11,7 @@ import type { TFunction } from "@/i18n";
 import { formatPercent } from "@/lib/format";
 import styles from "@/styles/calculator.module.css";
 
-/** Share of claimed fees that stays with vault participants (the rest funds the buyback and the treasury). */
+/** Share of claimed fees that stays with vault participants when a policy is published. */
 const HOLDER_SHARE = 0.7;
 const usd = (n: number, digits = 2) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: digits, maximumFractionDigits: digits });
 

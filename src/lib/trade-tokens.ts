@@ -1,7 +1,7 @@
-import { MANAGED_VAULTS, VAULT_PINS } from "./registry";
-import { STOCK_NAMES } from "@/components/StockLogo";
-import { TOKEN_ADDRESS, USDG_ADDRESS } from "./chain";
-import { BRAND } from "./brand";
+import { USDG_ADDRESS } from "./chain";
+import { STOCKIFY_WATCHLIST } from "./markets";
+import { getRobinhoodAssets } from "./robinhood/assets";
+import { readUsdgs } from "./tokens/usdg";
 
 export const NATIVE_ETH = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" as const;
 
@@ -13,28 +13,79 @@ export type TradeToken = {
   category: "core" | "stock" | "imported";
   logoUrl?: string;
   native?: boolean;
-  /** Message key in the `trade` namespace for the translated display name. Components resolve it with t(); `name` stays the English fallback (search, other callers). */
+  unavailable?: boolean;
+  /** Message key in the `trade` namespace for the translated display name. */
   nameKey?: "token.ether" | "token.globalDollar" | "token.brand" | "token.stock";
   /** `{name}` placeholder for `nameKey` (the company name for a Stock Token). */
   baseName?: string;
 };
 
-function stockTokens(): TradeToken[] {
-  return VAULT_PINS.flatMap((pin) => {
-    const entry = MANAGED_VAULTS.find((m) => m.id === pin.id);
-    if (!entry) return [];
-    const address = entry.token0.toLowerCase() === USDG_ADDRESS.toLowerCase() ? entry.token1 : entry.token0;
-    const baseName = STOCK_NAMES.find((s) => s.symbol === pin.symbol)?.name ?? pin.symbol;
-    return [{ address, symbol: pin.symbol, name: `${baseName} Stock Token`, nameKey: "token.stock" as const, baseName, decimals: 18, category: "stock" as const, logoUrl: `/stock-tokens/${pin.symbol.toLowerCase()}.png` }];
-  });
-}
+export const ETH_TRADE_TOKEN: TradeToken = {
+  address: NATIVE_ETH,
+  symbol: "ETH",
+  name: "Ether",
+  nameKey: "token.ether",
+  decimals: 18,
+  category: "core",
+  logoUrl: "/brands/eth.svg",
+  native: true,
+};
 
-export const TRADE_TOKENS: TradeToken[] = [
-  { address: NATIVE_ETH, symbol: "ETH", name: "Ether", nameKey: "token.ether", decimals: 18, category: "core", logoUrl: "/brands/eth.svg", native: true },
-  { address: USDG_ADDRESS, symbol: "USDG", name: "Global Dollar", nameKey: "token.globalDollar", decimals: 6, category: "core", logoUrl: "/brands/usdg.png" },
-  { address: TOKEN_ADDRESS, symbol: BRAND.token, name: `${BRAND.name} token`, nameKey: "token.brand", decimals: 18, category: "core", logoUrl: "/icon.svg" },
-  ...stockTokens(),
-];
+/** USDG stub. `decimals` is filled from a live chain read in `getTradeTokens`. */
+export const USDG_TRADE_TOKEN: TradeToken = {
+  address: USDG_ADDRESS,
+  symbol: "USDG",
+  name: "Global Dollar",
+  nameKey: "token.globalDollar",
+  decimals: 0,
+  category: "core",
+  logoUrl: "/brands/usdg.png",
+};
+
+/** Core tokens only. Stock tokens are appended from the Robinhood registry. */
+export const TRADE_TOKENS: TradeToken[] = [ETH_TRADE_TOKEN, USDG_TRADE_TOKEN];
+
+export async function getTradeTokens(): Promise<TradeToken[]> {
+  const tokens: TradeToken[] = [{ ...ETH_TRADE_TOKEN }];
+  const usdg = await readUsdgs();
+  tokens.push({
+    ...USDG_TRADE_TOKEN,
+    name: usdg.data?.name ?? USDG_TRADE_TOKEN.name,
+    symbol: usdg.data?.symbol ?? "USDG",
+    decimals: usdg.data?.decimals ?? 0,
+    unavailable: !usdg.data,
+  });
+  const assets = await getRobinhoodAssets();
+  for (const symbol of STOCKIFY_WATCHLIST) {
+    const asset = assets.data?.find((a) => a.tokenSymbol === symbol);
+    const deployed = asset?.chain4663;
+    if (!deployed) {
+      tokens.push({
+        address: `unavailable:${symbol}`,
+        symbol,
+        name: asset?.tokenName ?? symbol,
+        decimals: 0,
+        category: "stock",
+        logoUrl: asset?.logoUrl,
+        nameKey: "token.stock",
+        baseName: asset?.tokenName ?? symbol,
+        unavailable: true,
+      });
+      continue;
+    }
+    tokens.push({
+      address: deployed.contractAddress,
+      symbol,
+      name: asset?.tokenName ?? symbol,
+      decimals: asset?.tokenDecimals ?? 18,
+      category: "stock",
+      logoUrl: asset?.logoUrl,
+      nameKey: "token.stock",
+      baseName: asset?.tokenName ?? symbol,
+    });
+  }
+  return tokens;
+}
 
 export type TradeQuote = {
   providerId: string;

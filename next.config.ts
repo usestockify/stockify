@@ -3,12 +3,19 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  serverExternalPackages: ["pg", "pg-native", "pg-connection-string"],
   images: {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [32, 48, 64, 96, 128, 256, 384],
+    imageSizes: [20, 24, 32, 40, 48, 64, 96, 128, 256, 384],
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.robinhood.com", pathname: "/**" },
+    ],
   },
   async redirects() {
-    return [{ source: "/trade", destination: "/trade/swap", permanent: false }];
+    return [
+      { source: "/trade", destination: "/trade/swap", permanent: false },
+      { source: "/zap", destination: "/markets", permanent: false },
+    ];
   },
   async headers() {
     return [

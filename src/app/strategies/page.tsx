@@ -1,28 +1,22 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Lock, Plus } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { StockLogo } from "@/components/StockLogo";
 import { getT } from "@/i18n/server";
 import { BRAND } from "@/lib/brand";
+import { STOCKIFY_MARKETS } from "@/lib/markets";
 import "@/styles/strategies.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("strategies");
-  return { title: `${t("meta.title")} · ${BRAND.name}` };
+  return { title: t("meta.title") };
 }
 
-const BASKET = ["MSTR", "PLTR", "GME", "TSLA", "NVDA", "AMD"];
-/** Illustrative weights for the card art; the page itself computes the live split. */
-const ALLOCATOR_PREVIEW: [string, number][] = [
-  ["CRCL", 23],
-  ["USDG", 22],
-  ["PLTR", 20],
-  ["INTC", 18],
-  ["META", 17],
-];
+const PREVIEW = STOCKIFY_MARKETS.slice(0, 5).map((m) => m.symbol);
+const BASKET = STOCKIFY_MARKETS.slice(0, 6).map((m) => m.symbol);
 
 export default async function StrategiesPage() {
   const t = await getT("strategies");
@@ -41,8 +35,8 @@ export default async function StrategiesPage() {
             </div>
             <p className="masthead-intro">{t("hero.intro")}</p>
             <div className="masthead-aside">
-              <span className="strategy-status strategy-status-live">
-                <i aria-hidden="true" /> {t("hero.live")}
+              <span className="strategy-status">
+                {t("hero.live")}
               </span>
             </div>
           </div>
@@ -56,16 +50,14 @@ export default async function StrategiesPage() {
                 <p className="eyebrow">{t("allocator.eyebrow")}</p>
                 <h2>{t("allocator.title")}</h2>
               </div>
-              <span className="strategy-status strategy-status-live">
-                <i aria-hidden="true" /> {t("allocator.live")}
-              </span>
+              <span className="strategy-status">{t("allocator.live")}</span>
             </header>
             <div className="strategy-visual strategy-allocator" aria-label={t("allocator.visualAria")}>
               <div className="strategy-allocator-bars" aria-hidden="true">
-                {ALLOCATOR_PREVIEW.map(([s, w]) => (
-                  <span key={s} style={{ width: `${w}%` }}>
-                    {s === "USDG" ? <Image src="/brands/usdg.png" alt="" width={28} height={28} /> : <StockLogo symbol={s} size={28} />}
-                    <b>{w}%</b>
+                {PREVIEW.map((s) => (
+                  <span key={s} style={{ width: `${100 / PREVIEW.length}%` }}>
+                    <StockLogo symbol={s} size={28} />
+                    <b>{s}</b>
                   </span>
                 ))}
               </div>
@@ -104,9 +96,7 @@ export default async function StrategiesPage() {
                 <p className="eyebrow">{t("basket.eyebrow")}</p>
                 <h2>{t("basket.title")}</h2>
               </div>
-              <span className="strategy-status strategy-status-live">
-                <i aria-hidden="true" /> {t("basket.live")}
-              </span>
+              <span className="strategy-status">{t("basket.live")}</span>
             </header>
             <div className="strategy-visual strategy-basket" aria-label={t("basket.visualAria")}>
               <div className="strategy-basket-marks">
@@ -140,82 +130,8 @@ export default async function StrategiesPage() {
             </dl>
             <footer className="strategy-card-foot">
               <span className="strategy-closed">{t("basket.foot")}</span>
-              <Link href="/strategies/basket">
+              <Link href="/docs">
                 {t("basket.open")} <ArrowRight size={14} aria-hidden="true" />
-              </Link>
-            </footer>
-          </article>
-          <article className="strategy-card">
-            <header className="strategy-card-head">
-              <div>
-                <p className="eyebrow">{t("neutral.eyebrow")}</p>
-                <h2>{t("neutral.title")}</h2>
-              </div>
-              <span className="strategy-status">
-                <Lock size={12} strokeWidth={1.6} aria-hidden="true" /> {t("neutral.inDesign")}
-              </span>
-            </header>
-            <div className="strategy-visual strategy-neutral" aria-label={t("neutral.visualAria")}>
-              <div className="strategy-side strategy-long">
-                <span className="strategy-side-label">
-                  <ArrowUpRight size={13} aria-hidden="true" /> {t("neutral.long")}
-                </span>
-                <span className="strategy-side-marks">
-                  <StockLogo symbol="TSLA" size={36} />
-                  <span className="strategy-usdg">
-                    <Image alt="USDG" width={36} height={36} src="/brands/usdg.png" />
-                  </span>
-                </span>
-                <b>{t("neutral.longTitle")}</b>
-                <span>{t("neutral.longSub")}</span>
-              </div>
-              <div className="strategy-combine" aria-hidden="true">
-                <Plus size={16} strokeWidth={1.6} />
-              </div>
-              <div className="strategy-side strategy-short">
-                <span className="strategy-side-label">
-                  <ArrowDownRight size={13} aria-hidden="true" /> {t("neutral.short")}
-                </span>
-                <span className="strategy-side-marks">
-                  <StockLogo symbol="TSLA" size={36} />
-                </span>
-                <b>{t("neutral.shortTitle")}</b>
-                <span>{t("neutral.shortSub")}</span>
-              </div>
-              <div className="strategy-result">{t("neutral.result")}</div>
-            </div>
-            <p className="strategy-lede">
-              {t("neutral.lede.before")}
-              <span className="strategy-inline-mark">
-                <StockLogo symbol="TSLA" size={18} />
-                {t("neutral.lede.first")}
-              </span>
-              <span className="strategy-inline-mark">
-                <StockLogo symbol="MSTR" size={18} />
-                {t("neutral.lede.second")}
-              </span>
-              {t("neutral.lede.after")}
-            </p>
-            <dl className="strategy-facts">
-              <div>
-                <dt>{t("facts.earns")}</dt>
-                <dd>{t("neutral.earns")}</dd>
-              </div>
-              <div>
-                <dt>{t("facts.exposure")}</dt>
-                <dd>{t("neutral.exposure")}</dd>
-              </div>
-              <div>
-                <dt>{t("facts.deposit")}</dt>
-                <dd className="strategy-deposit">
-                  <Image src="/brands/usdg.png" alt="" width={22} height={22} /> USDG
-                </dd>
-              </div>
-            </dl>
-            <footer className="strategy-card-foot">
-              <span className="strategy-closed">{t("neutral.foot")}</span>
-              <Link href="/lending">
-                {t("neutral.lending")} <ArrowRight size={14} aria-hidden="true" />
               </Link>
             </footer>
           </article>

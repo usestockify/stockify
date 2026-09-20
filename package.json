@@ -1,11 +1,13 @@
 {
-  "name": "vertex",
+  "name": "stockify",
   "version": "1.0.0",
   "private": true,
-  "description": "Vertex: USDG vaults, lending and strategies for tokenized stocks on Robinhood Chain.",
+  "description": "stockify: USDG liquidity infrastructure for tokenized stock markets on Robinhood Chain.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
+    "stockify:dev": "tsx --tsconfig tsconfig.json scripts/dev.ts",
+    "stockify:check": "tsx --tsconfig tsconfig.json scripts/check.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -15,11 +17,13 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.126.0",
+    "@tanstack/react-query": "^5.103.1",
     "lucide-react": "^0.474.0",
     "next": "15.5.25",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "viem": "^2.31.0"
+    "viem": "^2.31.0",
+    "wagmi": "^2.19.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",

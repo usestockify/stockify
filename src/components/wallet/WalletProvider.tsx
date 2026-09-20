@@ -12,6 +12,7 @@ import {
 } from "react";
 import { createWalletClient, custom, getAddress, type Address, type EIP1193Provider, type WalletClient } from "viem";
 import { robinhoodChain } from "@/lib/chain";
+import type { TxLifecycle } from "@/lib/wallet/types";
 import { useT } from "@/i18n/client";
 
 type WalletState = {
@@ -23,6 +24,8 @@ type WalletState = {
   chainId?: number;
   connecting: boolean;
   error?: string;
+  onTargetChain: boolean;
+  network: Extract<TxLifecycle, "idle" | "wallet-required" | "wrong-network">;
   connect: () => Promise<void>;
   disconnect: () => void;
   /** Prompts the wallet to add / switch to Robinhood Chain. */
@@ -31,17 +34,11 @@ type WalletState = {
 };
 
 const WalletContext = createContext<WalletState | null>(null);
-const STORAGE_KEY = "vertex:wallet";
-
-declare global {
-  interface Window {
-    ethereum?: EIP1193Provider & { isMetaMask?: boolean; providers?: EIP1193Provider[] };
-  }
-}
+const STORAGE_KEY = "stockify:wallet";
 
 function injected(): EIP1193Provider | undefined {
   if (typeof window === "undefined") return undefined;
-  return window.ethereum;
+  return (window as Window & { ethereum?: EIP1193Provider }).ethereum;
 }
 
 const CHAIN_PARAMS = {
@@ -162,9 +159,25 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return createWalletClient({ account: address, chain: robinhoodChain, transport: custom(provider) });
   }, [address]);
 
+  const onTargetChain = Boolean(address) && chainId === robinhoodChain.id;
+  const network: WalletState["network"] = !address ? "wallet-required" : onTargetChain ? "idle" : "wrong-network";
+
   const value = useMemo<WalletState>(
-    () => ({ ready, available, address, chainId, connecting, error, connect, disconnect, switchChain, walletClient }),
-    [ready, available, address, chainId, connecting, error, connect, disconnect, switchChain, walletClient],
+    () => ({
+      ready,
+      available,
+      address,
+      chainId,
+      connecting,
+      error,
+      onTargetChain,
+      network,
+      connect,
+      disconnect,
+      switchChain,
+      walletClient,
+    }),
+    [ready, available, address, chainId, connecting, error, onTargetChain, network, connect, disconnect, switchChain, walletClient],
   );
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }

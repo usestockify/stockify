@@ -9,7 +9,7 @@ import { getStatus, type StatusReport } from "@/server/status";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("status");
-  return { title: `${t("meta.title")} · ${BRAND.name}` };
+  return { title: t("meta.title") };
 }
 export const dynamic = "force-dynamic";
 

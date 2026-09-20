@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const pin = findLendingMarket(market);
   if (!pin) return { title: BRAND.name };
   const t = await getT("lending");
-  return { title: `${t("meta.marketTitle", { symbol: pin.symbol })} · ${BRAND.name}` };
+  return { title: t("meta.marketTitle", { symbol: pin.symbol }) };
 }
 
 export function generateStaticParams() {

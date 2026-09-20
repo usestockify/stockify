@@ -13,16 +13,19 @@ import "@/styles/greptile.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BRAND.siteUrl),
-  title: BRAND.name,
+  title: {
+    default: `${BRAND.titleName} — USDG liquidity for tokenized stocks`,
+    template: `%s · ${BRAND.titleName}`,
+  },
   description: BRAND.description,
   openGraph: {
-    title: BRAND.name,
+    title: `${BRAND.titleName} — USDG liquidity for tokenized stocks`,
     description: BRAND.ogDescription,
     images: [{ url: "/og.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: BRAND.name,
+    title: `${BRAND.titleName} — USDG liquidity for tokenized stocks`,
     description: BRAND.ogDescription,
     images: ["/og.png"],
   },
@@ -40,8 +43,8 @@ export const metadata: Metadata = {
 /** Drives the browser chrome colour on installed and mobile sessions. */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F7F7F9" },
-    { media: "(prefers-color-scheme: dark)", color: "#3D3B4F" },
+    { media: "(prefers-color-scheme: light)", color: "#F3EFE6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1B4332" },
   ],
   width: "device-width",
   initialScale: 1,

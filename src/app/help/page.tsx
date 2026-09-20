@@ -7,7 +7,7 @@ import { BRAND } from "@/lib/brand";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("help");
-  return { title: `${t("meta.title")} · ${BRAND.name}` };
+  return { title: t("meta.title") };
 }
 
 export default function HelpPage() {

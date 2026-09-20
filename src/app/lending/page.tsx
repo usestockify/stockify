@@ -1,25 +1,40 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { LendingDirectory } from "@/components/lending/LendingDirectory";
 import { getT } from "@/i18n/server";
-import { BRAND } from "@/lib/brand";
-import { getLendingMarkets } from "@/server/lending";
-import "@/styles/lending.css";
+import "@/styles/strategies.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("lending");
-  return { title: `${t("meta.title")} · ${BRAND.name}` };
+  return { title: t("meta.title") };
 }
-export const dynamic = "force-dynamic";
 
 export default async function LendingPage() {
-  const markets = await getLendingMarkets().catch(() => null);
+  const t = await getT("lending");
   return (
-    <div className="app-page">
+    <main className="app-page">
       <SiteHeader />
-      <LendingDirectory initial={markets?.data ?? null} />
+      <section className="masthead">
+        <div className="masthead-inner">
+          <div className="masthead-head">
+            <div className="masthead-title">
+              <p className="eyebrow">{t("dir.eyebrow")}</p>
+              <h1>
+                {t("dir.title.before")}
+                <em className="serif">{t("dir.title.em")}</em>
+              </h1>
+            </div>
+            <p className="masthead-intro">{t("dir.intro")}</p>
+            <div className="masthead-aside">
+            <Link className="hex hex-md hex-green" href="/markets">
+              {t("dir.cta")}
+            </Link>
+            </div>
+          </div>
+        </div>
+      </section>
       <SiteFooter />
-    </div>
+    </main>
   );
 }

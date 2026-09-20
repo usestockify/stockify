@@ -47,8 +47,10 @@ export async function getStatus(): Promise<StatusReport> {
 
   // Oracle: Chainlink feed freshness for the META stock feed via the guard registry.
   let oracle = { tone: "neutral" as Tone, state: "checking", tag: "Awaiting quorum", detail: "Awaiting the first verified on-chain heartbeat." };
-  try {
-    const market = LENDING_MARKETS[0];
+  const market = LENDING_MARKETS[0];
+  if (!market) {
+    oracle = { tone: "neutral", state: "unpublished", tag: "No markets published", detail: "Lending and vault contracts are not live. Status stays pending until a reviewed deployment is published." };
+  } else try {
     const cfg = await client.readContract({ address: market.guard as Address, abi: guardAbi, functionName: "feedConfig", args: [market.stock as Address] });
     const [, , , updatedAt] = await client.readContract({ address: cfg[0], abi: chainlinkFeedAbi, functionName: "latestRoundData" });
     const age = Math.floor(now / 1000) - Number(updatedAt);
@@ -70,15 +72,16 @@ export async function getStatus(): Promise<StatusReport> {
   const reachable = rows.filter((r) => r.snapshot).length;
   const open = rows.filter((r) => r.snapshot?.extras?.managedState?.open && !r.snapshot.extras.managedState.stopped && !r.snapshot.extras.managedState.recovery).length;
   const vault = {
-    tone: (reachable === rows.length && rows.length > 0 ? "good" : reachable > 0 ? "warning" : "danger") as Tone,
-    state: reachable === rows.length ? "deployed" : `${reachable} of ${rows.length} reachable`,
-    tag: `${open} of ${rows.length} open`,
-    detail: "The vault fails closed when price or network safety cannot be confirmed.",
+    tone: (rows.length === 0 ? "neutral" : reachable === rows.length ? "good" : reachable > 0 ? "warning" : "danger") as Tone,
+    state: rows.length === 0 ? "unpublished" : reachable === rows.length ? "deployed" : `${reachable} of ${rows.length} reachable`,
+    tag: rows.length === 0 ? "No vaults published" : `${open} of ${rows.length} open`,
+    detail: rows.length === 0 ? "Vault contracts publish with a reviewed deployment." : "The vault fails closed when price or network safety cannot be confirmed.",
   };
 
   // Keeper: guard pause flag + lending market state.
-  let keeper = { tone: "warning" as Tone, state: "unknown", tag: "Execution status unknown", detail: "Every capital-moving plan requires matching on-chain approval." };
+  let keeper = { tone: "neutral" as Tone, state: "unpublished", tag: "No keeper published", detail: "Keeper status appears when a reviewed market is live." };
   try {
+    if (!LENDING_MARKETS[0] || !VAULT_PINS[0]) throw new Error("unpublished");
     const paused = await client.readContract({ address: LENDING_MARKETS[0].guard as Address, abi: guardAbi, functionName: "keeperPaused" }).catch(() => null);
     const state = lending?.data[0]?.contractState.name ?? "Unknown";
     const lastRebalance = await client.readContract({ address: VAULT_PINS[0].vault as Address, abi: managedVaultAbi, functionName: "lastRebalance" }).catch(() => null);
@@ -130,12 +133,15 @@ export async function getStatus(): Promise<StatusReport> {
     return { name, lastSuccess: t ? new Date(t).toISOString() : null, tone: !t ? "neutral" : stale ? "warning" : "good", label: !t ? "Pending" : stale ? "Delayed" : "Current" };
   });
 
+  const unpublished = rows.length === 0 && LENDING_MARKETS.length === 0;
   const tones = [api.tone, oracle.tone, vault.tone];
-  const overall = tones.includes("danger")
-    ? { tone: "danger" as Tone, label: "Some systems are degraded" }
-    : tones.includes("warning")
-      ? { tone: "warning" as Tone, label: "Some systems are waiting on fresh data" }
-      : { tone: "good" as Tone, label: "All monitored systems operational" };
+  const overall = unpublished
+    ? { tone: "neutral" as Tone, label: "Markets not yet deployed" }
+    : tones.includes("danger")
+      ? { tone: "danger" as Tone, label: "Some systems are degraded" }
+      : tones.includes("warning")
+        ? { tone: "warning" as Tone, label: "Some systems are waiting on fresh data" }
+        : { tone: "good" as Tone, label: "All monitored systems operational" };
 
   const data: StatusReport = { checkedAt: new Date(now).toISOString(), overall, components: { api, oracle, vault, keeper }, jobs: jobList };
   g.__statusCache = { at: now, data };

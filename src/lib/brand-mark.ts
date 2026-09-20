@@ -1,5 +1,5 @@
 /**
- * The Vertex mark: four beaded petals around a square, traced from the
+ * The Stockify pinwheel: four blades on a 100 x 100 box. Fill it with any
  * supplied artwork into a single path on a 100 x 100 box. Fill it with any
  * colour; use fill-rule evenodd so the petal loops stay open.
  */

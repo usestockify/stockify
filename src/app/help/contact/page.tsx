@@ -9,7 +9,7 @@ import styles from "@/styles/help.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("help");
-  return { title: `${t("contact.meta.title")} · ${BRAND.name}` };
+  return { title: t("contact.meta.title") };
 }
 
 const PORTAL = process.env.NEXT_PUBLIC_SUPPORT_URL;

@@ -1,26 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { STOCK_NAMES, StockLogo } from "@/components/StockLogo";
+import { StockLogo } from "@/components/StockLogo";
 import { CtaArt, DepositArt, FeeSplitArt, LendingArt, RangeArt } from "@/components/home/Art";
-import { HeroOrb } from "@/components/home/HeroOrb";
+import { MarketTopologyHero } from "@/components/home/MarketTopologyHero";
 import { FaqAccordion, type FaqItem } from "@/components/home/FaqAccordion";
-import { LendingFrame } from "@/components/home/LendingFrame";
 import { LiveVaultCards } from "@/components/home/LiveVaultCards";
 import { ProtocolFigures } from "@/components/home/ProtocolFigures";
-import { ContractAddress } from "@/components/ContractAddress";
 import { BRAND, CHAIN_NAME } from "@/lib/brand";
-import { VAULT_PINS } from "@/lib/registry";
-import { getLendingMarkets } from "@/server/lending";
+import { STOCKIFY_MARKETS, marketHref } from "@/lib/markets";
+import { getStockifyCatalog } from "@/lib/stockify/catalog";
 import { getT } from "@/i18n/server";
 import type { TFunction } from "@/i18n";
 import "@/styles/home.css";
 
 export const dynamic = "force-dynamic";
-
-const WALL = VAULT_PINS.slice(0, 16).map((p) => ({ symbol: p.symbol, href: `/vaults/${encodeURIComponent(p.id)}`, name: STOCK_NAMES.find((s) => s.symbol === p.symbol)?.name ?? p.symbol }));
 
 const STACK = [
   { key: "robinhood", src: "/brands/robinhood-mark.svg" },
@@ -30,7 +25,7 @@ const STACK = [
 ];
 
 function buildFaq(t: TFunction): FaqItem[] {
-  const vars = { name: BRAND.name };
+  const vars = { name: BRAND.titleName };
   return [
     { q: t("faq.1.q", vars), a: t("faq.1.a", vars) },
     { q: t("faq.2.q", vars), a: t("faq.2.a", vars) },
@@ -38,6 +33,12 @@ function buildFaq(t: TFunction): FaqItem[] {
     { q: t("faq.4.q", vars), a: t("faq.4.a", vars) },
     { q: t("faq.5.q", vars), a: t("faq.5.a", vars) },
     { q: t("faq.6.q", vars), a: t("faq.6.a", vars) },
+    { q: t("faq.11.q", vars), a: t("faq.11.a", vars) },
+    { q: t("faq.8.q", vars), a: t("faq.8.a", vars) },
+    { q: t("faq.9.q", vars), a: t("faq.9.a", vars) },
+    { q: t("faq.10.q", vars), a: t("faq.10.a", vars) },
+    { q: t("faq.12.q", vars), a: t("faq.12.a", vars) },
+    { q: t("faq.13.q", vars), a: t("faq.13.a", vars) },
     {
       q: t("faq.7.q", vars),
       a: (
@@ -104,9 +105,13 @@ function HatchBand() {
 
 export default async function HomePage() {
   const t = await getT("home");
-  const lending = await getLendingMarkets().catch(() => null);
-  const market = lending?.data[0] ?? null;
   const FAQ = buildFaq(t);
+  const catalog = await getStockifyCatalog();
+  const WALL = STOCKIFY_MARKETS.map((market) => ({
+    symbol: market.symbol,
+    href: marketHref(market.slug),
+    name: catalog.data?.find((row) => row.symbol === market.symbol)?.name ?? market.symbol,
+  }));
   return (
     <main className="home">
       <SiteHeader />
@@ -114,40 +119,32 @@ export default async function HomePage() {
       {/* ---------------- hero ---------------- */}
       <section className="home-hero g-rails bg-grid-faint" style={{ color: "var(--border)" }}>
         <Rails />
-        <div className="home-hero-art" aria-hidden="true">
-          <HeroOrb className="home-hero-orb" size={720} />
-        </div>
         <div className="home-hero-inner g-shell">
-          <div className="home-hero-top g-reveal">
+          <div className="home-hero-copy g-reveal">
             <h1>
               {t("hero.title1a")}
-              <br className="home-hero-br-m" /> {t("hero.title1b")}
               <br />
               {t("hero.title2a")}
-              <br className="home-hero-br-m" /> {t("hero.title2b")}
             </h1>
-          </div>
-          <div className="home-hero-art-mobile" aria-hidden="true">
-            <HeroOrb className="home-hero-orb" size={360} />
-          </div>
-          <div className="home-hero-bottom g-reveal g-reveal-2">
             <p>{t("hero.lede", { chain: CHAIN_NAME })}</p>
             <div className="hex-group">
-              <Link className="hex-outline hex-notch hex-md hex-slate" href="/docs">
+              <Link className="hex-outline hex-notch hex-md hex-slate" href="#how">
                 {t("hero.how")}
               </Link>
-              <Link className="hex hex-md hex-green" href="/vaults">
+              <Link className="hex hex-md hex-green" href="/markets">
                 {t("hero.start")}
               </Link>
             </div>
             <RiskNote t={t} />
-            <ContractAddress />
+          </div>
+          <div className="home-hero-art g-reveal g-reveal-2" aria-hidden="true">
+            <MarketTopologyHero className="home-hero-orb" />
           </div>
         </div>
       </section>
 
       <hr className="g-hr" />
-      <PillRow label={t("wall.pill", { count: VAULT_PINS.length })} />
+      <PillRow label={t("wall.pill", { count: WALL.length })} />
       <div className="home-wall g-shell">
         {WALL.map((w) => (
           <Link key={w.symbol} href={w.href} className="home-wall-cell" aria-label={t("wall.aria", { name: w.name })}>
@@ -161,12 +158,12 @@ export default async function HomePage() {
       {/* ---------------- vaults (dark) ---------------- */}
       <div className="t-slate home-dark">
         <div className="line-fade" aria-hidden="true" />
-        <section className="g-rails" style={{ color: "rgba(255,207,254,.35)" }}>
+        <section className="g-rails" style={{ color: "rgba(212,229,216,.4)" }}>
           <Rails />
           <div className="g-section g-head-split">
             <div className="g-tight">
               <span className="g-label c-lavender">{t("vaults.label")}</span>
-              <h2 className="c-lavender">{t("vaults.title", { name: BRAND.name })}</h2>
+              <h2 className="c-lavender">{t("vaults.title", { name: BRAND.titleName })}</h2>
               <p className="g-lede c-lavender">{t("vaults.lede")}</p>
             </div>
             <div>
@@ -174,24 +171,24 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div className="div-ruler" style={{ color: "rgba(255,207,254,.3)" }} aria-hidden="true" />
-        <section className="g-rails" style={{ color: "rgba(255,207,254,.35)" }}>
+        <div className="div-ruler" style={{ color: "rgba(212,229,216,.35)" }} aria-hidden="true" />
+        <section className="g-rails" id="how" style={{ color: "rgba(212,229,216,.4)" }}>
           <Rails />
-          <PillRow label={t("steps.pill")} tint="#FFCFFE" />
+          <PillRow label={t("steps.pill")} tint="#C5D6C8" />
           <div className="g-section">
             <div className="home-steps">
               {[
                 { n: "01", title: t("steps.1.title"), d: t("steps.1.desc"), Art: DepositArt },
                 { n: "02", title: t("steps.2.title"), d: t("steps.2.desc"), Art: RangeArt },
-                { n: "03", title: t("steps.3.title"), d: t("steps.3.desc", { name: BRAND.name }), Art: FeeSplitArt },
+                { n: "03", title: t("steps.3.title"), d: t("steps.3.desc", { name: BRAND.titleName }), Art: FeeSplitArt },
               ].map(({ n, title, d, Art }) => (
                 <div key={n} className="home-step c-lavender">
-                  <div className="g-frame" style={{ color: "#FFCFFE" }}>
+                  <div className="g-frame" style={{ color: "var(--seafoam)" }}>
                     <div className="div-hatch" />
                     <div className="g-frame-row">
                       <div className="div-hatch-v" />
                       <div className="g-frame-body">
-                        <div className="g-frame-img" style={{ background: "#3D3B4F" }}>
+                        <div className="g-frame-img" style={{ background: "var(--slate)" }}>
                           <Art />
                         </div>
                       </div>
@@ -209,18 +206,18 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div className="div-ruler div-ruler-flip" style={{ color: "rgba(255,207,254,.3)" }} aria-hidden="true" />
-        <section className="g-rails" style={{ color: "rgba(255,207,254,.35)" }}>
+        <div className="div-ruler div-ruler-flip" style={{ color: "rgba(212,229,216,.35)" }} aria-hidden="true" />
+        <section className="g-rails" style={{ color: "rgba(212,229,216,.4)" }}>
           <Rails />
           <div className="g-section g-head g-center">
             <h2 className="c-lavender">{t("live.title")}</h2>
             <p className="g-lede c-lavender">{t("live.lede")}</p>
           </div>
         </section>
-        <div className="div-ruler" style={{ color: "rgba(255,207,254,.3)" }} aria-hidden="true" />
-        <section className="g-rails" style={{ color: "rgba(255,207,254,.35)" }}>
+        <div className="div-ruler" style={{ color: "rgba(212,229,216,.35)" }} aria-hidden="true" />
+        <section className="g-rails" style={{ color: "rgba(212,229,216,.4)" }}>
           <Rails />
-          <PillRow label={t("live.pill")} tint="#FFCFFE" />
+          <PillRow label={t("live.pill")} tint="#C5D6C8" />
           <div className="g-section">
             <LiveVaultCards />
             <RiskNote t={t} tone="dark" />
@@ -229,7 +226,7 @@ export default async function HomePage() {
         <div className="line-fade line-fade-up" aria-hidden="true" />
       </div>
 
-      {/* ---------------- lending ---------------- */}
+      {/* ---------------- coming soon ---------------- */}
       <section className="t-bg">
         <div className="g-section g-head g-center">
           <span className="g-label c-green">{t("lending.label")}</span>
@@ -245,10 +242,8 @@ export default async function HomePage() {
                 <div className="g-frame-row">
                   <div className="div-hatch-v" />
                   <div className="g-frame-body">
-                    <div className="g-frame-img home-lend-frame">
-                      <div>
-                        <LendingFrame market={market} />
-                      </div>
+                    <div className="g-frame-img">
+                      <RangeArt />
                     </div>
                   </div>
                   <div className="div-hatch-v" />
@@ -259,7 +254,7 @@ export default async function HomePage() {
                 <span className="g-label-xs">{t("lending.supply.label")}</span>
                 <p className="g-sub-sm">{t("lending.supply.title")}</p>
                 <p className="g-body">{t("lending.supply.desc")}</p>
-                <Link className="hex hex-md hex-slate" href={market ? `/lending/${market.pin.slug}` : "/lending"}>
+                <Link className="hex hex-md hex-slate" href="/strategies">
                   {t("lending.supply.cta")}
                 </Link>
               </div>
@@ -282,7 +277,7 @@ export default async function HomePage() {
                 <span className="g-label-xs">{t("lending.borrow.label")}</span>
                 <p className="g-sub-sm">{t("lending.borrow.title")}</p>
                 <p className="g-body">{t("lending.borrow.desc")}</p>
-                <Link className="hex hex-md hex-slate" href="/lending">
+                <Link className="hex hex-md hex-slate" href="/allocator">
                   {t("lending.borrow.cta")}
                 </Link>
               </div>
@@ -299,7 +294,7 @@ export default async function HomePage() {
             <p className="g-lede">{t("guard.lede")}</p>
           </div>
           <div>
-            <MoreLink href="/docs#safeguards">{t("guard.more")}</MoreLink>
+            <MoreLink href="/docs#risks">{t("guard.more")}</MoreLink>
           </div>
         </div>
         <div className="div-ruler" style={{ color: "rgba(61,59,79,.2)" }} aria-hidden="true" />
@@ -331,7 +326,8 @@ export default async function HomePage() {
         <div className="home-stack-row g-shell">
           {STACK.map((item) => (
             <div key={item.key} className="home-stack-item">
-              <Image src={item.src} alt="" width={28} height={28} />
+              {/* eslint-disable-next-line @next/next/no-img-element -- tiny brand marks; avoid next/image hydration overlay */}
+              <img src={item.src} alt="" width={28} height={28} />
               <span>
                 <b>{t(`stack.${item.key}.title`)}</b>
                 <small>{t(`stack.${item.key}.desc`)}</small>
@@ -399,12 +395,12 @@ export default async function HomePage() {
         </div>
         <div className="home-cta-inner g-grid">
           <div className="col-6 home-cta-copy">
-            <h2 className="c-lime">{t("cta.title", { name: BRAND.name })}</h2>
+            <h2 className="c-lime">{t("cta.title", { name: BRAND.titleName })}</h2>
             <div className="hex-group">
-              <Link className="hex-outline hex-notch hex-md hex-lime" href="/docs">
+              <Link className="hex-outline hex-notch hex-md hex-lime" href="#how">
                 {t("cta.docs")}
               </Link>
-              <Link className="hex hex-md hex-green" href="/vaults">
+              <Link className="hex hex-md hex-green" href="/markets">
                 {t("cta.start")}
               </Link>
             </div>

@@ -11,14 +11,11 @@ import { erc20Abi } from "@/lib/abis";
 import { BRAND } from "@/lib/brand";
 import { explorerTx, publicClient, robinhoodChain } from "@/lib/chain";
 import { describeTxError } from "@/lib/managed-vault";
-import { TRADE_TOKENS, type QuotesResponse, type TradeQuote, type TradeToken } from "@/lib/trade-tokens";
+import { ETH_TRADE_TOKEN, TRADE_TOKENS, USDG_TRADE_TOKEN, type QuotesResponse, type TradeQuote, type TradeToken } from "@/lib/trade-tokens";
 import styles from "@/styles/trade.module.css";
 
 const PROVIDERS = [
   { id: "kyber", name: "KyberSwap", logo: "/brands/kyberswap.svg" },
-  { id: "zero-x", name: "0x", logo: "/brands/zero-x.svg" },
-  { id: "nordstern", name: "Nordstern", logo: "/brands/nordstern.svg" },
-  { id: "enso", name: "Enso", logo: "/brands/enso.png" },
 ];
 
 const fmtAmount = (raw: bigint | string | null | undefined, decimals: number) => {
@@ -57,7 +54,7 @@ function TokenPicker({ title, tokens, excluded, onSelect, onClose, onImport }: {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const q = query.trim().toLowerCase();
-  const list = tokens.filter((t) => (category === "all" || t.category === category) && (!q || t.symbol.toLowerCase().includes(q) || t.name.toLowerCase().includes(q) || t.address.toLowerCase().includes(q)));
+  const list = tokens.filter((t) => !t.unavailable && (category === "all" || t.category === category) && (!q || t.symbol.toLowerCase().includes(q) || t.name.toLowerCase().includes(q) || t.address.toLowerCase().includes(q)));
   const importable = isAddress(query.trim()) && !tokens.some((t) => t.address.toLowerCase() === query.trim().toLowerCase()) ? query.trim() : null;
   async function importToken() {
     if (!importable) return;
@@ -141,10 +138,10 @@ const MIN_GAS_RESERVE = 100_000_000_000_000n; // 0.0001 ETH
 
 export function SwapTicket() {
   const t = useT("trade");
-  const { address: owner, ready, connect, walletClient, chainId, switchChain } = useWallet();
+  const { address: owner, ready, connect, walletClient, chainId, switchChain, network } = useWallet();
   const [tokens, setTokens] = useState<TradeToken[]>(TRADE_TOKENS);
-  const [tokenIn, setTokenIn] = useState<TradeToken>(TRADE_TOKENS[0]);
-  const [tokenOut, setTokenOut] = useState<TradeToken>(TRADE_TOKENS[1]);
+  const [tokenIn, setTokenIn] = useState<TradeToken>(ETH_TRADE_TOKEN);
+  const [tokenOut, setTokenOut] = useState<TradeToken>(USDG_TRADE_TOKEN);
   const [amount, setAmount] = useState("");
   const [slippage, setSlippage] = useState("0.5");
   const [picker, setPicker] = useState<"in" | "out" | null>(null);
@@ -161,6 +158,27 @@ export function SwapTicket() {
   const [hash, setHash] = useState<Hex | null>(null);
   const busyRef = useRef(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/trade/tokens", { cache: "no-store" });
+        const json = (await res.json()) as { data?: TradeToken[] };
+        if (!cancelled && json.data?.length) {
+          const live = json.data.filter((tok) => !tok.unavailable && tok.decimals > 0);
+          setTokens(live.length ? live : json.data);
+          setTokenIn((current) => live.find((tok) => tok.address.toLowerCase() === current.address.toLowerCase()) ?? live[0] ?? current);
+          setTokenOut((current) => live.find((tok) => tok.address.toLowerCase() === current.address.toLowerCase()) ?? live[1] ?? live[0] ?? current);
+        }
+      } catch {
+        /* keep ETH/USDG stubs; USDG decimals stay 0 until the chain read works */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const amountRaw = useMemo(() => {
     try {
       return /^\d*(\.\d*)?$/.test(amount) && amount && amount !== "." ? parseUnits(amount, tokenIn.decimals) : 0n;
@@ -172,7 +190,7 @@ export function SwapTicket() {
   const balanceKey = `${owner ?? ""}:${tokenIn.address}`;
 
   const readBalance = useCallback(async () => {
-    if (!owner) return setBalance(null);
+    if (!owner || tokenIn.unavailable || tokenIn.decimals <= 0) return setBalance(null);
     const client = publicClient();
     try {
       const value = tokenIn.native ? await client.getBalance({ address: owner }) : await client.readContract({ address: tokenIn.address as Address, abi: erc20Abi, functionName: "balanceOf", args: [owner] });
@@ -201,7 +219,7 @@ export function SwapTicket() {
   // Quotes
   useEffect(() => {
     if (busy) return;
-    if (tokenIn.address === tokenOut.address || amountRaw <= 0n) {
+    if (tokenIn.unavailable || tokenOut.unavailable || tokenIn.decimals <= 0 || tokenOut.decimals <= 0 || tokenIn.address === tokenOut.address || amountRaw <= 0n) {
       setQuotes(null);
       setQuoteError("");
       setCountdown(10);
@@ -234,7 +252,7 @@ export function SwapTicket() {
       clearTimeout(timer);
       ctrl.abort();
     };
-  }, [amountRaw, tokenIn.address, tokenOut.address, refreshTick, busy, t]);
+  }, [amountRaw, tokenIn.address, tokenIn.decimals, tokenIn.unavailable, tokenOut.address, tokenOut.decimals, tokenOut.unavailable, refreshTick, busy, t]);
 
   useEffect(() => {
     if (!quotes || busy) return;
@@ -252,7 +270,7 @@ export function SwapTicket() {
   const slippageBps = Math.min(5000, Math.max(1, Math.round((Number(slippage) || 0.5) * 100)));
   const minReceived = quote ? (BigInt(quote.netAmountOutRaw) * BigInt(10_000 - slippageBps)) / 10_000n : 0n;
   const rate = quote && Number(amount) > 0 ? Number(formatUnits(BigInt(quote.netAmountOutRaw), tokenOut.decimals)) / Number(amount) : null;
-  const canSwap = !!owner && !!quote?.executable && amountRaw > 0n && !exceedsBalance && !needsGas && !tooPrecise && !quoting;
+  const canSwap = !!owner && network === "idle" && !!quote?.executable && amountRaw > 0n && !exceedsBalance && !needsGas && !tooPrecise && !quoting && !tokenIn.unavailable && !tokenOut.unavailable && tokenIn.decimals > 0;
 
   function flip() {
     setTokenIn(tokenOut);
@@ -281,6 +299,7 @@ export function SwapTicket() {
           setMessage(t("swap.approve"));
           const data = encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [router, amountRaw] });
           const tx = await walletClient.sendTransaction({ account: owner, chain: robinhoodChain, to: tokenIn.address as Address, data });
+          setMessage(t("swap.waiting"));
           await client.waitForTransactionReceipt({ hash: tx });
         }
       }
@@ -393,7 +412,12 @@ export function SwapTicket() {
           </dl>
         </fieldset>
         {quoteError ? <p className={`${styles.message} ${styles.error}`}>{quoteError}</p> : null}
-        {owner ? (
+        {network === "wrong-network" ? (
+          <button className="wallet-button wallet-button-large" type="button" onClick={() => void switchChain()}>
+            <Wallet size={18} strokeWidth={1.5} aria-hidden="true" />
+            {t("ticket.switchNetwork")}
+          </button>
+        ) : owner ? (
           <button className={`btn btn-primary ${styles.submit}`} type="button" disabled={!canSwap || busy} onClick={() => void swap()}>
             {busy ? t("ticket.working") : quote && !quote.executable ? t("ticket.notExecutable") : t("ticket.swap")}
           </button>

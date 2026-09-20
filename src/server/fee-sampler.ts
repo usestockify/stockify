@@ -75,7 +75,7 @@ export async function recordAndEstimate(
   }
   const avgAssets = list.filter((s) => s.t >= first.t).reduce((a, s) => a + s.assets, 0) / list.filter((s) => s.t >= first.t).length;
   const grossDelta = fees - first.fees;
-  const netDelta = grossDelta * 0.7; // 70% of claimed fees stay in the vault; 20% buyback, 10% treasury
+  const netDelta = grossDelta; // net fees follow the published vault policy when one exists
   const apr = avgAssets > 0 ? (netDelta / avgAssets) * ((365 * 24 * 3600) / observedSeconds) : null;
   return { apr: apr !== null && Number.isFinite(apr) && apr >= 0 ? apr : null, observedSeconds, asOf: new Date(now).toISOString(), priceHistory };
 }

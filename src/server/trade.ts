@@ -5,7 +5,7 @@ import { MANAGED_VAULTS } from "@/lib/registry";
 import { NATIVE_ETH, type TradeQuote } from "@/lib/trade-tokens";
 
 const KYBER = "https://aggregator-api.kyberswap.com/robinhood/api/v1";
-const CLIENT_ID = "vertex";
+const CLIENT_ID = "stockify";
 
 export type KyberRoute = { routeSummary: { amountOut: string; gas: string; gasUsd?: string; amountOutUsd?: string; amountInUsd?: string }; routerAddress: string };
 

@@ -3,16 +3,13 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { BasketExit } from "@/components/strategies/BasketExit";
-import { BasketStrategy } from "@/components/strategies/BasketStrategy";
 import { getT } from "@/i18n/server";
-import { BRAND } from "@/lib/brand";
 import "@/styles/strategies.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT("strategies");
   return {
-    title: `${t("page.metaTitle")} · ${BRAND.name}`,
+    title: t("page.metaTitle"),
     description: t("page.metaDescription"),
   };
 }
@@ -41,8 +38,6 @@ export default async function BasketPage() {
         </div>
       </section>
       <div className="strategies-page">
-        <BasketStrategy />
-        <BasketExit />
         <section className="strategy-notes" aria-label={t("page.notesAria")}>
           <div>
             <h3>{t("page.doesTitle")}</h3>

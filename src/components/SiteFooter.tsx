@@ -1,73 +1,56 @@
-import Image from "next/image";
 import Link from "next/link";
 import { BRAND, CHAIN_NAME } from "@/lib/brand";
-import { explorerAddress, TOKEN_ADDRESS, USDG_ADDRESS } from "@/lib/chain";
 import { BrandMark } from "./BrandMark";
 import { BrandWireframe } from "./BrandWireframe";
 import { FooterCubes } from "./FooterCubes";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getT } from "@/i18n/server";
 
-type Column = { key: string; links: { href: string; key: string; external?: boolean }[] };
+type Column = { key: string; links: { href: string; key: string; external?: boolean; soon?: boolean }[] };
 
 /** Column and link labels resolve through `t("col.<key>")` and `t("link.<key>")` at render time. */
 const COLUMNS: Column[] = [
   {
     key: "products",
     links: [
+      { href: "/markets", key: "markets" },
       { href: "/vaults", key: "vaults" },
-      { href: "/lending", key: "lending" },
-      { href: "/strategies", key: "strategies" },
-      { href: "/allocator", key: "allocator" },
-      { href: "/trade/swap", key: "trade" },
-      { href: "/zap", key: "zap" },
+      { href: "/trade", key: "trade" },
+      { href: "/portfolio", key: "portfolio" },
     ],
   },
   {
-    key: "platform",
+    key: "soon",
     links: [
-      { href: "/intelligence", key: "intelligence" },
-      { href: "/portfolio", key: "portfolio" },
-      { href: "/docs", key: "docs" },
-      { href: "/help", key: "help" },
-      { href: "/status", key: "status" },
-      { href: "/verify", key: "verification" },
+      { href: "/strategies", key: "strategies" },
+      { href: "/allocator", key: "allocator" },
     ],
   },
   {
     key: "resources",
     links: [
-      { href: "/docs#vaults", key: "howVaultsWork" },
-      { href: "/calculator", key: "calculator" },
-      { href: "/docs#safeguards", key: "safeguards" },
-      { href: "/docs#flywheel", key: "flywheel" },
-      { href: "/docs#oracles", key: "chainlink" },
+      { href: "/docs", key: "docs" },
       { href: "/docs#contracts", key: "contracts" },
-      { href: "/docs#roadmap", key: "roadmap" },
-      { href: BRAND.repoUrl, key: "source", external: true },
-      { href: explorerAddress(TOKEN_ADDRESS), key: "tokenContract", external: true },
-      { href: explorerAddress(USDG_ADDRESS), key: "usdgContract", external: true },
+      { href: "/status", key: "status" },
+      { href: "/docs#risks", key: "risk" },
     ],
   },
   {
-    key: "support",
+    key: "network",
     links: [
-      { href: BRAND.telegramUrl, key: "telegram", external: true },
-      { href: "/help/contact", key: "contact" },
-      { href: "/docs#faq", key: "faq" },
-      { href: "/verify", key: "security" },
-      { href: "/status", key: "report" },
+      { href: "https://robinhoodchain.blockscout.com", key: "chain", external: true },
     ],
   },
 ];
 
-function FooterLink({ href, label, external }: { href: string; label: string; external?: boolean }) {
+function FooterLink({ href, label, external, soonLabel }: { href: string; label: string; external?: boolean; soonLabel?: string }) {
+  const text = soonLabel ? `${label} · ${soonLabel}` : label;
   return external ? (
     <a href={href} target="_blank" rel="noopener noreferrer">
-      {label} ↗
+      {text} ↗
     </a>
   ) : (
-    <Link href={href}>{label}</Link>
+    <Link href={href}>{text}</Link>
   );
 }
 
@@ -90,24 +73,21 @@ export async function SiteFooter() {
               {col.links.map((l) => (
                 <FooterLink key={l.href + l.key} href={l.href} label={t(`link.${l.key}`)} external={l.external} />
               ))}
-              {i === 0 ? (
-                <div className="gf-status">
-                  <i aria-hidden="true" />
-                  <Link href="/status">{t("link.viewStatus")}</Link>
-                </div>
-              ) : null}
               {i === COLUMNS.length - 1 ? (
                 <>
                   <h2 style={{ marginTop: 12 }}>{t("col.socials")}</h2>
                   <div className="gf-socials">
                     <a href={BRAND.xUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onX", { name: BRAND.name })}>
-                      <Image src="/brands/x.svg" alt="" width={14} height={14} />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/brands/x.svg" alt="" width={14} height={14} />
                     </a>
                     <a href={BRAND.telegramUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onTelegram", { name: BRAND.name })}>
-                      <Image src="/brands/telegram.svg" alt="" width={14} height={14} />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/brands/telegram.svg" alt="" width={14} height={14} />
                     </a>
                     <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noopener noreferrer" aria-label={t("aria.explorer", { chain: CHAIN_NAME })}>
-                      <Image src="/brands/robinhood-mark.svg" alt="" width={14} height={14} />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/brands/robinhood-mark.svg" alt="" width={14} height={14} />
                     </a>
                   </div>
                 </>
@@ -120,7 +100,8 @@ export async function SiteFooter() {
 
       <div className="gf-mobile">
         <div className="gf-mobile-band">
-          <Image src="/design/scales-footer.png" alt="" width={1080} height={1080} sizes="100vw" />
+          {/* eslint-disable-next-line @next/next/no-img-element -- next/image hidden attr hydrates poorly on this decorative asset */}
+          <img src="/design/scales-footer.png" alt="" width={1080} height={1080} />
           <Link className="gf-mobile-brand" href="/" aria-label={t("aria.home", { name: BRAND.name })}>
             <BrandMark color="#3D3B4F" />
             <span className="gh-wordmark">{BRAND.name}</span>
@@ -134,14 +115,6 @@ export async function SiteFooter() {
               {col.links.map((l) => (
                 <FooterLink key={l.href + l.key} href={l.href} label={t(`link.${l.key}`)} external={l.external} />
               ))}
-              {i === 0 ? (
-                <div className="gf-status">
-                  <i aria-hidden="true" />
-                  <Link className="gf-link" href="/status">
-                    {t("link.viewStatus")}
-                  </Link>
-                </div>
-              ) : null}
             </div>
           ))}
         </div>
