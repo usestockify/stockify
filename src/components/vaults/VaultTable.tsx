@@ -9,6 +9,9 @@ import { useT } from "@/i18n/client";
 import type { DataEnvelope } from "@/lib/data";
 import { formatPrice } from "@/lib/format";
 import { STOCKIFY_MARKETS, marketHref } from "@/lib/markets";
+import { formatUnits, type Address } from "viem";
+import { publicClient } from "@/lib/chain";
+import { stockifyVaultAbi } from "@/lib/stockify/abis";
 import type { StockifyMarketRow } from "@/lib/stockify/catalog";
 
 export function VaultTable({ variant = "vaults" }: { variant?: "markets" | "vaults" }) {
@@ -164,7 +167,6 @@ function CatalogRow({ row }: { row: StockifyMarketRow }) {
   const bid = row.price?.equity.bid != null ? Number(row.price.equity.bid) : null;
   const ask = row.price?.equity.ask != null ? Number(row.price.equity.ask) : null;
   const generated = row.price?.equity.generatedAt;
-  const deployed = Boolean(row.deployment);
   return (
     <tr>
       <td>
@@ -180,15 +182,21 @@ function CatalogRow({ row }: { row: StockifyMarketRow }) {
         </PrefetchLink>
       </td>
       <td>
-        <span className="vault-table-tag vault-table-tag-waiting">{deployed ? t("table.notDeployed") : t("desk.noDeployment")}</span>
+        <span className={`vault-table-tag${row.vault?.status === "live" ? "" : " vault-table-tag-waiting"}`}>
+          {row.vault?.status === "live" ? t("table.live") : t("table.notDeployed")}
+        </span>
       </td>
       <td data-label={t("table.tvl")} className="mono vault-table-num">
-        {t("table.notDeployed")}
+        {row.vault?.tvl != null ? row.vault.tvl : t("table.notDeployed")}
       </td>
       <td data-label={t("table.feeApr")} className="mono vault-table-num vault-table-apr">
-        <span className="vault-table-muted" title={t("table.aprMissing")}>
-          —
-        </span>
+        {row.vault?.feesLifetime != null ? (
+          <span className="mono">{row.vault.feesLifetime}</span>
+        ) : (
+          <span className="vault-table-muted" title={t("table.aprMissing")}>
+            —
+          </span>
+        )}
       </td>
       <td data-label={t("table.refPrice")}>
         {bid != null && ask != null && Number.isFinite(bid) && Number.isFinite(ask) ? (
@@ -201,10 +209,12 @@ function CatalogRow({ row }: { row: StockifyMarketRow }) {
         )}
       </td>
       <td data-label={t("table.lpStatus")}>
-        <span className="vault-table-tag vault-table-tag-none">{t("rangeStatus.waiting")}</span>
+        <span className={`vault-table-tag${row.vault?.range === "in-range" ? "" : " vault-table-tag-none"}`}>
+          {t(`rangeStatus.${row.vault?.range ?? "waiting"}`)}
+        </span>
       </td>
       <td data-label={t("table.yourPosition")} className="mono vault-table-num">
-        <span className="vault-table-muted">—</span>
+        <VaultPositionCell vault={row.vault?.address ?? null} />
       </td>
       <td className="vault-table-action">
         <PrefetchLink className="btn btn-sm btn-ghost" href={marketHref(row.slug)}>
@@ -213,4 +223,42 @@ function CatalogRow({ row }: { row: StockifyMarketRow }) {
       </td>
     </tr>
   );
+}
+
+function VaultPositionCell({ vault }: { vault: string | null }) {
+  const t = useT("vaults");
+  const { address: owner } = useWallet();
+  const [value, setValue] = useState<string | null>(null);
+  useEffect(() => {
+    if (!owner || !vault) {
+      setValue(null);
+      return;
+    }
+    let cancelled = false;
+    publicClient()
+      .readContract({ address: vault as Address, abi: stockifyVaultAbi, functionName: "balanceOf", args: [owner] })
+      .then(async (shares) => {
+        if (cancelled) return;
+        if (!shares) {
+          setValue("0");
+          return;
+        }
+        const assets = await publicClient().readContract({
+          address: vault as Address,
+          abi: stockifyVaultAbi,
+          functionName: "convertToAssets",
+          args: [shares],
+        });
+        if (!cancelled) setValue(Number(formatUnits(assets, 6)).toLocaleString(undefined, { maximumSignificantDigits: 6 }));
+      })
+      .catch(() => {
+        if (!cancelled) setValue(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [owner, vault]);
+  if (!owner) return <span className="vault-table-muted">{t("table.connectToSee")}</span>;
+  if (!vault) return <span className="vault-table-muted">—</span>;
+  return <span>{value ?? "—"}</span>;
 }

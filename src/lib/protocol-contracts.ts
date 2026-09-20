@@ -1,5 +1,6 @@
 import { USDG_ADDRESS } from "@/lib/chain";
 import { PONS_V2 } from "@/lib/pons/config";
+import { isConfigured, loadManifest } from "@/lib/stockify/deployments";
 
 export type ContractStatus = "configured" | "not-configured";
 
@@ -11,18 +12,20 @@ export type ProtocolContract = {
   layer: "stockify" | "pons" | "robinhood";
 };
 
-/**
- * Stockify contract surface. Only addresses that are actually configured
- * appear; everything else stays unpublished. Never invent a 0x value.
- * PONS is not the Stockify vault system.
- */
+function slot(id: string, label: string, address: string, layer: ProtocolContract["layer"] = "stockify"): ProtocolContract {
+  const ok = isConfigured(address);
+  return { id, label, address: ok ? address : null, status: ok ? "configured" : "not-configured", layer };
+}
+
+const manifest = loadManifest();
+
 export const PROTOCOL_CONTRACTS: ProtocolContract[] = [
   { id: "usdg", label: "USDG", address: USDG_ADDRESS, status: "configured", layer: "robinhood" },
-  { id: "factory", label: "Vault Factory", address: null, status: "not-configured", layer: "stockify" },
-  { id: "router", label: "Router", address: null, status: "not-configured", layer: "stockify" },
-  { id: "registry", label: "Stock Token Registry", address: null, status: "not-configured", layer: "stockify" },
-  { id: "oracle", label: "Oracle Adapter", address: null, status: "not-configured", layer: "stockify" },
-  { id: "markets", label: "Market Contracts", address: null, status: "not-configured", layer: "stockify" },
+  slot("factory", "Vault Factory", manifest.vaultFactory),
+  slot("strategyFactory", "Strategy Factory", manifest.strategyFactory),
+  slot("router", "Router", manifest.router),
+  slot("registry", "Stock Token Registry", manifest.registry),
+  slot("oracle", "Oracle Adapter", manifest.oracle),
 ];
 
 export const PONS_CONTRACTS: ProtocolContract[] = [

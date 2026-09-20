@@ -10,7 +10,8 @@ import { LiveVaultCards } from "@/components/home/LiveVaultCards";
 import { ProtocolFigures } from "@/components/home/ProtocolFigures";
 import { BRAND, CHAIN_NAME } from "@/lib/brand";
 import { STOCKIFY_MARKETS, marketHref } from "@/lib/markets";
-import { getStockifyCatalog } from "@/lib/stockify/catalog";
+import { getRobinhoodAssets } from "@/lib/robinhood/assets";
+import { failed, withTimeout } from "@/lib/data";
 import { getT } from "@/i18n/server";
 import type { TFunction } from "@/i18n";
 import "@/styles/home.css";
@@ -106,11 +107,11 @@ function HatchBand() {
 export default async function HomePage() {
   const t = await getT("home");
   const FAQ = buildFaq(t);
-  const catalog = await getStockifyCatalog();
+  const assets = await withTimeout(getRobinhoodAssets(), 2500, failed("Robinhood assets timed out"));
   const WALL = STOCKIFY_MARKETS.map((market) => ({
     symbol: market.symbol,
     href: marketHref(market.slug),
-    name: catalog.data?.find((row) => row.symbol === market.symbol)?.name ?? market.symbol,
+    name: assets.data?.find((row) => row.tokenSymbol === market.symbol)?.tokenName ?? market.symbol,
   }));
   return (
     <main className="home">

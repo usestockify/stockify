@@ -49,7 +49,8 @@ export async function poolQuote(tokenIn: string, tokenOut: string, amountIn: big
   }
 }
 
-export async function collectQuotes(tokenIn: string, tokenOut: string, amountIn: string) {
+export async function collectQuotes(tokenIn: string, tokenOut: string, amountIn: string, recipient?: string) {
+  void recipient;
   const [kyber, pool] = await Promise.all([
     kyberRoute(tokenIn, tokenOut, amountIn).catch(() => null),
     tokenIn !== NATIVE_ETH && tokenOut !== NATIVE_ETH ? poolQuote(tokenIn, tokenOut, BigInt(amountIn)) : Promise.resolve(null),

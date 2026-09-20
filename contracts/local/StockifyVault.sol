@@ -45,7 +45,7 @@ contract MockUSDG {
     }
 }
 
-contract StockifyVault {
+contract LocalIdleVault {
     MockUSDG public immutable asset;
     string public name;
     string public symbol;
@@ -96,7 +96,7 @@ contract StockifyVault {
     }
 }
 
-contract StockifyVaultFactory {
+contract LocalIdleVaultFactory {
     address[] public vaults;
     event VaultCreated(address indexed vault, address indexed asset, string name);
 
@@ -105,7 +105,7 @@ contract StockifyVaultFactory {
     }
 
     function createVault(MockUSDG asset, string calldata name_, string calldata symbol_) external returns (address vault) {
-        StockifyVault deployed = new StockifyVault(asset, name_, symbol_);
+        LocalIdleVault deployed = new LocalIdleVault(asset, name_, symbol_);
         vault = address(deployed);
         vaults.push(vault);
         emit VaultCreated(vault, address(asset), name_);

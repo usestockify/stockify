@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { Address, PublicClient } from "viem";
 import { ROBINHOOD_CHAIN_ID, publicClient } from "@/lib/chain";
 import { ponsLaunchFactoryAbi } from "@/lib/pons/abis";

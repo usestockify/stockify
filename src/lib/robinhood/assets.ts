@@ -54,7 +54,7 @@ function parseAsset(value: unknown): RobinhoodStockAsset | null {
 async function fetchAssets(): Promise<RobinhoodStockAsset[]> {
   const res = await fetch(ROBINHOOD_ASSETS_URL, {
     headers: { accept: "application/json" },
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(4_000),
     next: { revalidate: 300 },
   });
   if (!res.ok) throw new Error(`Robinhood assets HTTP ${res.status}`);
@@ -86,4 +86,8 @@ export async function getRobinhoodAsset(symbol: string): Promise<DataEnvelope<Ro
 
 export function chain4663Address(asset: RobinhoodStockAsset) {
   return asset.chain4663?.contractAddress ?? null;
+}
+
+export function isActiveChain4663Asset(asset: RobinhoodStockAsset) {
+  return asset.status === "ASSET_STATUS_ACTIVE" && Boolean(asset.chain4663);
 }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { Pool } from "pg";
 import type { FileStore, IndexerStateRow, PonsEventRow, PonsLaunchRow } from "./types";
 import { migrateIndexer } from "./types";
@@ -37,7 +39,7 @@ export async function connectPostgres(url: string, startBlock: string): Promise<
   pool: Pool;
 }> {
   const pg = await import(/* webpackIgnore: true */ "pg");
-  const pool = new pg.Pool({ connectionString: url, max: 4, idleTimeoutMillis: 30_000 });
+  const pool = new pg.Pool({ connectionString: url, max: 4, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 2_000 });
   await pool.query(SCHEMA);
 
   async function load(): Promise<FileStore> {

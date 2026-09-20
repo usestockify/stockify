@@ -54,3 +54,7 @@ export const ponsLaunchTokenAbi = parseAbi([
   "function tokenDescription() view returns (string)",
   "function getTokenInfo() view returns (address deployer, string logo, string description, (string twitter, string telegram, string discord, string website, string farcaster) socials)",
 ]);
+
+export const uniswapV4PoolManagerAbi = parseAbi([
+  "function getSlot0(bytes32 id) view returns (uint160 sqrtPriceX96, int24 tick, uint24 protocolFee, uint24 lpFee)",
+]);

@@ -1,9 +1,12 @@
 import type { Address } from "viem";
+import { formatUnits } from "viem";
 import { publicClient } from "@/lib/chain";
 import { STOCKIFY_WATCHLIST } from "@/lib/markets";
 import { getRobinhoodAssets } from "@/lib/robinhood/assets";
 import { readStockTokenBalance } from "@/lib/tokens/stock";
 import { readUsdgs, readUsdgsBalance, USDG_ADDRESS } from "@/lib/tokens/usdg";
+import { stockifyVaultAbi } from "@/lib/stockify/abis";
+import { isConfigured, loadManifest } from "@/lib/stockify/deployments";
 import type { WalletPosition } from "./types";
 
 export async function readWalletPositions(owner: Address): Promise<WalletPosition[]> {
@@ -90,6 +93,44 @@ export async function readWalletPositions(owner: Address): Promise<WalletPositio
       status: bal.data ? "ready" : "error",
       error: bal.error,
     });
+  }
+
+  const manifest = loadManifest();
+  for (const [ticker, market] of Object.entries(manifest.markets)) {
+    if (!isConfigured(market.vault)) continue;
+    try {
+      const [shares, decimals] = await Promise.all([
+        client.readContract({ address: market.vault, abi: stockifyVaultAbi, functionName: "balanceOf", args: [owner] }),
+        client.readContract({ address: market.vault, abi: stockifyVaultAbi, functionName: "decimals" }),
+      ]);
+      const assetsOut = shares > 0n ? await client.readContract({ address: market.vault, abi: stockifyVaultAbi, functionName: "convertToAssets", args: [shares] }) : 0n;
+      positions.push({
+        key: `st${ticker}`,
+        symbol: `st${ticker}`,
+        name: `Stockify ${ticker} Vault`,
+        address: market.vault,
+        native: false,
+        decimals,
+        raw: shares.toString(),
+        ui: formatUnits(assetsOut, 6),
+        uiMultiplier: null,
+        status: "ready",
+      });
+    } catch (error) {
+      positions.push({
+        key: `st${ticker}`,
+        symbol: `st${ticker}`,
+        name: `Stockify ${ticker} Vault`,
+        address: market.vault,
+        native: false,
+        decimals: null,
+        raw: null,
+        ui: null,
+        uiMultiplier: null,
+        status: "error",
+        error: error instanceof Error ? error.message : "vault position unavailable",
+      });
+    }
   }
 
   return positions;

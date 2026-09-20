@@ -40,7 +40,11 @@ export function publicRpcUrl() {
 }
 
 export function serverRpcUrls(): string[] {
-  const preferred = splitUrls(process.env.RPC_URL);
+  const preferred = [
+    ...splitUrls(process.env.RH_ARCHIVE_RPC_URL),
+    ...splitUrls(process.env.RH_RPC_URL),
+    ...splitUrls(process.env.RPC_URL),
+  ];
   const listed = splitUrls(process.env.RPC_URLS);
   const publicDefault = [publicRpcUrl(), ...PUBLIC_RPC_FALLBACKS];
   const merged = [...preferred, ...(listed.length ? listed : publicDefault)];
@@ -76,11 +80,11 @@ let indexer: PublicClient | undefined;
  */
 export function publicClient(): PublicClient {
   if (!client) {
-    const direct = http(undefined, { batch: true, timeout: 12_000, retryCount: 1 });
+    const direct = http(undefined, { batch: true, timeout: 4_000, retryCount: 0 });
     const transport =
       typeof window === "undefined"
         ? fallback(
-            serverRpcUrls().map((url) => http(url, { batch: true, timeout: 12_000, retryCount: 0 })),
+            serverRpcUrls().map((url) => http(url, { batch: true, timeout: 4_000, retryCount: 0 })),
             { rank: false },
           )
         : fallback([direct, http("/api/rpc", { batch: true, timeout: 15_000 })], { rank: false });

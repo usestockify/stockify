@@ -1,9 +1,21 @@
 import type { Address } from "viem";
-import { chainlinkFeedAbi, guardAbi, lendingMarketAbi, managedVaultAbi } from "@/lib/abis";
+import { getRobinhoodAssets } from "@/lib/robinhood/assets";
+import { getRobinhoodPrices } from "@/lib/robinhood/prices";
+import { indexerSnapshot } from "@/server/indexer/pons";
+import { stockifySnapshot } from "@/server/indexer/stockify";
 import { publicClient } from "@/lib/chain";
-import { LENDING_MARKETS, VAULT_PINS } from "@/lib/registry";
-import { getVaultSnapshots } from "./vault-snapshots";
-import { getLendingMarkets } from "./lending";
+import { PONS_V2 } from "@/lib/pons/config";
+import {
+  stockifyFactoryAbi,
+  stockifyOracleAbi,
+  stockifyRegistryAbi,
+  stockifyRouterAbi,
+  stockifyStrategyAbi,
+  stockifyStrategyFactoryAbi,
+  stockifyVaultAbi,
+} from "@/lib/stockify/abis";
+import { isConfigured, loadManifest } from "@/lib/stockify/deployments";
+import { pingStore } from "@/server/db/store";
 
 export type Tone = "good" | "warning" | "danger" | "neutral" | "pending";
 
@@ -21,129 +33,130 @@ export type StatusReport = {
   jobs: StatusJob[];
 };
 
-const STOCK_FEED_FRESH_SECONDS = 26 * 3600; // stock feeds pause over weekends; 24/5 cadence
+const g = globalThis as unknown as { __statusCache?: { at: number; data: StatusReport } };
 
-const g = globalThis as unknown as { __statusCache?: { at: number; data: StatusReport }; __statusJobs?: Record<string, number> };
-
-function markJob(name: string, ok: boolean) {
-  const jobs = (g.__statusJobs ??= {});
-  if (ok) jobs[name] = Date.now();
+async function probe(label: string, fn: () => Promise<unknown>): Promise<{ ok: boolean; detail: string }> {
+  try {
+    await fn();
+    return { ok: true, detail: `${label} ok` };
+  } catch (error) {
+    return { ok: false, detail: `${label}: ${error instanceof Error ? error.message : "failed"}` };
+  }
 }
 
 export async function getStatus(): Promise<StatusReport> {
-  const c = g.__statusCache;
-  if (c && Date.now() - c.at < 15_000) return c.data;
-  const client = publicClient();
+  const cached = g.__statusCache;
+  if (cached && Date.now() - cached.at < 15_000) return cached.data;
   const now = Date.now();
+  const client = publicClient();
+  const manifest = loadManifest();
+  const jobs: StatusJob[] = [];
+  const mark = (name: string, ok: boolean, detail?: string) => {
+    jobs.push({
+      name,
+      lastSuccess: ok ? new Date(now).toISOString() : null,
+      tone: ok ? "good" : "danger",
+      label: ok ? "Current" : detail ?? "Failed",
+    });
+  };
 
-  const [block, snapshots, lending] = await Promise.all([
-    client.getBlock({ blockTag: "latest" }).catch(() => null),
-    getVaultSnapshots().catch(() => null),
-    getLendingMarkets().catch(() => null),
-  ]);
-  markJob("Vault accounting", !!snapshots && snapshots.data.some((r) => r.snapshot));
-  markJob("Market indexing", !!lending);
-  markJob("Live market indexing", !!snapshots && snapshots.data.every((r) => r.snapshot));
+  const block = await probe("RPC", () => client.getBlockNumber());
+  mark("RPC", block.ok, block.detail);
 
-  // Oracle: Chainlink feed freshness for the META stock feed via the guard registry.
-  let oracle = { tone: "neutral" as Tone, state: "checking", tag: "Awaiting quorum", detail: "Awaiting the first verified on-chain heartbeat." };
-  const market = LENDING_MARKETS[0];
-  if (!market) {
-    oracle = { tone: "neutral", state: "unpublished", tag: "No markets published", detail: "Lending and vault contracts are not live. Status stays pending until a reviewed deployment is published." };
-  } else try {
-    const cfg = await client.readContract({ address: market.guard as Address, abi: guardAbi, functionName: "feedConfig", args: [market.stock as Address] });
-    const [, , , updatedAt] = await client.readContract({ address: cfg[0], abi: chainlinkFeedAbi, functionName: "latestRoundData" });
-    const age = Math.floor(now / 1000) - Number(updatedAt);
-    const fresh = age <= Math.max(Number(cfg[1]) * 2, STOCK_FEED_FRESH_SECONDS);
-    oracle = {
-      tone: fresh ? "good" : "warning",
-      state: fresh ? "healthy" : "stale",
-      tag: `${VAULT_PINS.length} feeds registered`,
-      detail: fresh ? `Reference feed updated ${Math.round(age / 60)} minutes ago. Price-dependent actions are allowed.` : `Reference feed last updated ${Math.round(age / 3600)} hours ago. Price-dependent actions wait for fresh pricing.`,
-    };
-    markJob("Oracle sampling", true);
-    markJob("Chainlink feed registry", true);
+  const assets = await getRobinhoodAssets().catch(() => null);
+  mark("Robinhood assets", Boolean(assets?.data?.length), assets?.error ?? "unavailable");
+
+  const prices = await getRobinhoodPrices(["NVDA"]).catch(() => null);
+  mark("Price API", Boolean(prices?.NVDA?.data), prices?.NVDA?.error ?? "unavailable");
+
+  const pons = await probe("PONS factory", () => client.getBytecode({ address: PONS_V2.factory as Address }));
+  mark("PONS", pons.ok, pons.detail);
+
+  const ponsIdx = indexerSnapshot();
+  mark("Indexer", Boolean(ponsIdx), "PONS indexer");
+
+  let dbOk = true;
+  try {
+    pingStore?.();
   } catch {
-    oracle = { tone: "warning", state: "unavailable", tag: "Feed check failed", detail: "The Chainlink reference feed could not be read. Price-dependent actions fail closed." };
+    dbOk = false;
+  }
+  mark("Database", dbOk);
+
+  const core: Array<[string, Address | string, unknown]> = [
+    ["StockRegistry", manifest.registry, stockifyRegistryAbi],
+    ["OracleAdapter", manifest.oracle, stockifyOracleAbi],
+    ["VaultFactory", manifest.vaultFactory, stockifyFactoryAbi],
+    ["StrategyFactory", manifest.strategyFactory, stockifyStrategyFactoryAbi],
+    ["Router", manifest.router, stockifyRouterAbi],
+  ];
+  let coreOk = 0;
+  for (const [name, address] of core) {
+    if (!isConfigured(String(address))) {
+      mark(name, false, "not deployed");
+      continue;
+    }
+    const r = await probe(name, () =>
+      client.readContract({ address: address as Address, abi: stockifyOracleAbi, functionName: "usdg" }),
+    );
+    mark(name, r.ok, r.detail);
+    if (r.ok) coreOk += 1;
   }
 
-  // Vault: every reviewed vault reachable and open?
-  const rows = snapshots?.data ?? [];
-  const reachable = rows.filter((r) => r.snapshot).length;
-  const open = rows.filter((r) => r.snapshot?.extras?.managedState?.open && !r.snapshot.extras.managedState.stopped && !r.snapshot.extras.managedState.recovery).length;
-  const vault = {
-    tone: (rows.length === 0 ? "neutral" : reachable === rows.length ? "good" : reachable > 0 ? "warning" : "danger") as Tone,
-    state: rows.length === 0 ? "unpublished" : reachable === rows.length ? "deployed" : `${reachable} of ${rows.length} reachable`,
-    tag: rows.length === 0 ? "No vaults published" : `${open} of ${rows.length} open`,
-    detail: rows.length === 0 ? "Vault contracts publish with a reviewed deployment." : "The vault fails closed when price or network safety cannot be confirmed.",
-  };
+  const markets = Object.entries(manifest.markets);
+  let vaultOk = 0;
+  let stratOk = 0;
+  for (const [ticker, m] of markets) {
+    const v = await probe(`${ticker} vault`, () =>
+      client.readContract({ address: m.vault, abi: stockifyVaultAbi, functionName: "totalAssets" }),
+    );
+    mark(`${ticker} vault`, v.ok, v.detail);
+    if (v.ok) vaultOk += 1;
+    const s = await probe(`${ticker} strategy`, () =>
+      client.readContract({ address: m.strategy, abi: stockifyStrategyAbi, functionName: "totalAssets" }),
+    );
+    mark(`${ticker} strategy`, s.ok, s.detail);
+    if (s.ok) stratOk += 1;
+  }
 
-  // Keeper: guard pause flag + lending market state.
-  let keeper = { tone: "neutral" as Tone, state: "unpublished", tag: "No keeper published", detail: "Keeper status appears when a reviewed market is live." };
-  try {
-    if (!LENDING_MARKETS[0] || !VAULT_PINS[0]) throw new Error("unpublished");
-    const paused = await client.readContract({ address: LENDING_MARKETS[0].guard as Address, abi: guardAbi, functionName: "keeperPaused" }).catch(() => null);
-    const state = lending?.data[0]?.contractState.name ?? "Unknown";
-    const lastRebalance = await client.readContract({ address: VAULT_PINS[0].vault as Address, abi: managedVaultAbi, functionName: "lastRebalance" }).catch(() => null);
-    keeper = {
-      tone: paused ? "danger" : "warning",
-      state: paused ? "paused" : "execute",
-      tag: paused ? "Guardian pause active" : "Execution enabled",
-      detail: `Every capital-moving plan requires matching on-chain approval. Lending market ${state.toLowerCase()}.${lastRebalance ? ` Last rebalance ${new Date(Number(lastRebalance) * 1000).toISOString()}.` : ""}`,
-    };
-    markJob("Keeper planning", !paused);
-    markJob("Execution receipts", !paused);
-    markJob("Network heartbeat", !!block);
-    void lendingMarketAbi;
-  } catch {}
+  const stockifyIdx = stockifySnapshot();
+  mark("Stockify indexer", Boolean(stockifyIdx));
+
+  const allMarkets = vaultOk === 11 && stratOk === 11 && coreOk === 5 && block.ok;
+  const unpublished = markets.length === 0 || !isConfigured(manifest.vaultFactory);
 
   const api = {
-    tone: (snapshots && block ? "good" : "danger") as Tone,
-    state: snapshots && block ? "Operational" : "Degraded",
-    tag: snapshots?.source === "upstream" ? "Upstream" : "Live",
-    detail: block ? `Serves public vault, market, and safety information. Chain head ${block.number.toString()}.` : "Robinhood Chain RPC is unreachable.",
+    tone: (block.ok ? "good" : "danger") as Tone,
+    state: block.ok ? "Operational" : "Degraded",
+    tag: block.ok ? "RPC" : "Offline",
+    detail: block.ok ? "Robinhood Chain RPC reachable." : block.detail,
   };
-  markJob("Pool discovery", !!snapshots);
-  markJob("Liquidity sampling", !!snapshots);
-  markJob("Token registry", true);
-  markJob("Position monitoring", !!snapshots);
-  markJob("Opportunity scoring", !!snapshots && snapshots.data.some((r) => r.snapshot?.apr !== null));
-  markJob("Operation reconciliation", !!lending);
+  const oracle = {
+    tone: (jobs.find((j) => j.name === "OracleAdapter")?.tone === "good" ? "good" : unpublished ? "neutral" : "danger") as Tone,
+    state: unpublished ? "unpublished" : jobs.find((j) => j.name === "OracleAdapter")?.tone === "good" ? "healthy" : "unavailable",
+    tag: unpublished ? "Not deployed" : "Chainlink adapter",
+    detail: unpublished ? "OracleAdapter publishes with the reviewed deployment." : "Onchain Chainlink adapter reads.",
+  };
+  const vault = {
+    tone: (unpublished ? "neutral" : allMarkets ? "good" : "danger") as Tone,
+    state: unpublished ? "unpublished" : `${vaultOk} of 11 vaults`,
+    tag: unpublished ? "No vaults published" : `${stratOk} of 11 strategies`,
+    detail: unpublished ? "Vault contracts publish with a reviewed deployment." : `Vault reads ${vaultOk}/11 · strategy reads ${stratOk}/11.`,
+  };
+  const keeper = {
+    tone: (stockifyIdx || ponsIdx ? "good" : "warning") as Tone,
+    state: stockifyIdx ? "indexing" : "pending",
+    tag: "Indexer",
+    detail: "PONS and Stockify event indexers.",
+  };
 
-  const jobs = g.__statusJobs ?? {};
-  const JOB_NAMES = [
-    "Chainlink feed registry",
-    "Oracle sampling",
-    "Execution receipts",
-    "Keeper planning",
-    "Operation reconciliation",
-    "Position monitoring",
-    "Opportunity scoring",
-    "Network heartbeat",
-    "Liquidity sampling",
-    "Token registry",
-    "Pool discovery",
-    "Market indexing",
-    "Live market indexing",
-    "Vault accounting",
-  ];
-  const jobList: StatusJob[] = JOB_NAMES.map((name) => {
-    const t = jobs[name];
-    const stale = !t || now - t > 30 * 60 * 1000;
-    return { name, lastSuccess: t ? new Date(t).toISOString() : null, tone: !t ? "neutral" : stale ? "warning" : "good", label: !t ? "Pending" : stale ? "Delayed" : "Current" };
-  });
-
-  const unpublished = rows.length === 0 && LENDING_MARKETS.length === 0;
-  const tones = [api.tone, oracle.tone, vault.tone];
   const overall = unpublished
     ? { tone: "neutral" as Tone, label: "Markets not yet deployed" }
-    : tones.includes("danger")
-      ? { tone: "danger" as Tone, label: "Some systems are degraded" }
-      : tones.includes("warning")
-        ? { tone: "warning" as Tone, label: "Some systems are waiting on fresh data" }
-        : { tone: "good" as Tone, label: "All monitored systems operational" };
+    : allMarkets
+      ? { tone: "good" as Tone, label: "Stockify markets 11 / 11 Operational" }
+      : { tone: "danger" as Tone, label: `Stockify markets ${vaultOk} / 11` };
 
-  const data: StatusReport = { checkedAt: new Date(now).toISOString(), overall, components: { api, oracle, vault, keeper }, jobs: jobList };
+  const data: StatusReport = { checkedAt: new Date(now).toISOString(), overall, components: { api, oracle, vault, keeper }, jobs };
   g.__statusCache = { at: now, data };
   return data;
 }

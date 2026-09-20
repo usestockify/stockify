@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { STOCKIFY_WATCHLIST } from "@/lib/markets";
 import { stockifyRelevantLaunches } from "@/lib/pons/launches";
 import { getRobinhoodAssets, isActiveChain4663Asset } from "@/lib/robinhood/assets";

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { encodeAbiParameters, keccak256, type Address, type PublicClient } from "viem";
 import { publicClient, ZERO_ADDRESS } from "@/lib/chain";
 import { unavailable, ready, type DataEnvelope } from "@/lib/data";

@@ -20,6 +20,7 @@ import { status } from "./status";
 import { verify } from "./verify";
 import { errors } from "./errors";
 import { wallet } from "./wallet";
+import { zap } from "./zap";
 
 export const MESSAGES = {
   common,
@@ -40,6 +41,7 @@ export const MESSAGES = {
   verify,
   errors,
   wallet,
+  zap,
 } as const;
 
 export type Namespace = keyof typeof MESSAGES;

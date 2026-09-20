@@ -35,7 +35,7 @@ async function fetchPrice(symbol: string): Promise<StockPrice> {
   const ticker = symbol.toUpperCase();
   const res = await fetch(robinhoodPriceUrl(ticker), {
     headers: { accept: "application/json" },
-    signal: AbortSignal.timeout(12_000),
+    signal: AbortSignal.timeout(3_000),
     next: { revalidate: 15 },
   });
   if (!res.ok) throw new Error(`Robinhood price HTTP ${res.status} for ${ticker}`);

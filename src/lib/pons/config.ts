@@ -1,5 +1,4 @@
 import type { Address } from "viem";
-import { ZERO_ADDRESS } from "@/lib/chain";
 
 /**
  * PONS v2 contracts on Robinhood Chain.
@@ -25,7 +24,7 @@ export const PONS_V2 = {
  */
 export const PONS_FACTORY_START_BLOCK = 26841846n;
 
-export const PONS_NATIVE_PAIR = ZERO_ADDRESS;
+export const UNISWAP_V4_POOL_MANAGER_DOCUMENTED = "0x8366a39CC670B4001A1121B8F6A443A643e40951" as Address;
 
 export type PonsLaunchState = "not-graduated" | "swept" | "pool-created" | "rescued" | "unknown";
 

@@ -1,0 +1,152 @@
+{
+  "chainId": 4663,
+  "deploymentBlock": "67946702",
+  "USDG": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  "registry": "0x51259620ef60598c84cf69cde0ab08cfe753c176",
+  "oracle": "0x930921f66326c1f2653b6db6c417692fb7bdb9d9",
+  "router": "0x3533c7b34a40bee31933c605b1f45652bd71baab",
+  "vaultFactory": "0x3649e5a088eeadcc138a46233ac197d38800d378",
+  "strategyFactory": "0x54ee74ef732ae88beb892b2d4a4632a6be3ae368",
+  "uniswap": {
+    "v3Factory": "0x1f7d7550B1b028f7571E69A784071F0205FD2EfA",
+    "swapRouter02": "0xCaf681a66D020601342297493863E78C959E5cb2",
+    "quoterV2": "0x33e885eD0Ec9bF04EcfB19341582aADCb4c8A9E7",
+    "positionManager": "0x73991a25c818bf1f1128deaab1492d45638de0d3",
+    "universalRouter": "0x8876789976dEcBfCbBbe364623C63652db8C0904",
+    "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+    "v4PoolManager": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+    "v4PositionManager": "0x58daec3116aae6d93017baaea7749052e8a04fa7",
+    "v4Quoter": "0x8dc178efb8111bb0973dd9d722ebeff267c98f94",
+    "v4StateView": "0xf3334192d15450cdd385c8b70e03f9a6bd9e673b"
+  },
+  "markets": {
+    "NVDA": {
+      "stockToken": "0xd0601CE157Db5bdC3162BbaC2a2C8aF5320D9EEC",
+      "vault": "0xA76F86b321e7d5fb387990bB8Eb7B2ba860eB5e1",
+      "strategy": "0xeB134aF43aB3008936B705cf9660B55aB115aA62",
+      "pool": "0xb75d2D02B0Ec3DE50d32e40A4F1A8DAE8acC4333",
+      "feed": "0x379EC4f7C378F34a1B47E4F3cbeBCbAC3E8E9F15",
+      "fee": 100,
+      "deploymentTx": "0x814c3f23436184dc47c971ab9a171830b1f2f89efa3c3026b2590624e2ef527f"
+    },
+    "AAPL": {
+      "stockToken": "0xaF3D76f1834A1d425780943C99Ea8A608f8a93f9",
+      "vault": "0x82306236D77a00D4Dc8b1a36318327c5d275f3a6",
+      "strategy": "0x6885b1FA30A3A7b05a8252111619355012A67575",
+      "pool": "0xAae0d815EE56e4092a5E5C2911E676Fea50B2d6D",
+      "feed": "0x6B22A786bAa607d76728168703a39Ea9C99f2cD0",
+      "fee": 500,
+      "deploymentTx": "0xfd01bb63e106d270808bffb19f1a6b92a636b3f6d3113c9c7a05e587c9e67780"
+    },
+    "TSLA": {
+      "stockToken": "0x322F0929c4625eD5bAd873c95208D54E1c003b2d",
+      "vault": "0x5A706280C4a31e4e2a9c63Ac98502Ec986cfc72F",
+      "strategy": "0x7c3b92D816Bf57c872A83c9314359d83bE3Cd625",
+      "pool": "0x7868622Ff2C3b1B6C8acb15fE0bDAEBF043DDa48",
+      "feed": "0x4A1166a659A55625345e9515b32adECea5547C38",
+      "fee": 100,
+      "deploymentTx": "0x6b0fbf29348afc31bf9a5e6630fccebf311b8d169f8645cb8d95a8d3f7583744"
+    },
+    "META": {
+      "stockToken": "0xc0D6457C16Cc70d6790Dd43521C899C87ce02f35",
+      "vault": "0xc4A38E1AC4d8C67d3E6abd95A2074e521B41E1Db",
+      "strategy": "0xa59f4A5c6474b394AE0660498C605c3E9894A74F",
+      "pool": "0xad6Df50832884f3498cd354086CefB0e39070F1B",
+      "feed": "0x7C38C00C30BEe9378381E7B6135d7283356D71b1",
+      "fee": 100,
+      "deploymentTx": "0x1b4ea8c99873aef7d3287b4dcd763c55b20ce01e1773d0936c52271daccb3a95"
+    },
+    "MSFT": {
+      "stockToken": "0xe93237C50D904957Cf27E7B1133b510C669c2e74",
+      "vault": "0x4A2a4EEfa0E35EB7B594f90662Dc831e6f1a8ffa",
+      "strategy": "0x61F7c404E4fe95CE21f120F028cB050d9629e82C",
+      "pool": "0x3D69Ea64810300877b938E9AD9916C25912c08f5",
+      "feed": "0x45C3C877C15E6BA2EBB19eA114Ea508d14C1Af2E",
+      "fee": 100,
+      "deploymentTx": "0xa00b781bdb1f0f83935b557c8d6003ab49ee850d8404b12cf7e09a22ae7d9e0b"
+    },
+    "AMZN": {
+      "stockToken": "0x12f190a9F9d7D37a250758b26824B97CE941bF54",
+      "vault": "0xA87B41deC4613dE0D9967840892E3806E966f3C6",
+      "strategy": "0x152018a937D69549e9897FfcBdb62d454Ddd9D55",
+      "pool": "0x7b242Dfa849419242E3733308D5c91Fe2A7dAe7e",
+      "feed": "0xD5a1508ceD74c084eBf3cBe853e2C968fB2a651C",
+      "fee": 100,
+      "deploymentTx": "0x1b604850412417c7ec87b6c5dc59fdabc55a7b1e7e0d0743b93d35fab0587681"
+    },
+    "GOOGL": {
+      "stockToken": "0x2e0847E8910a9732eB3fb1bb4b70a580ADAD4FE3",
+      "vault": "0xa7C85A994d522e712dfbB7097cc7Fd27b7310Ee9",
+      "strategy": "0xcCeBd1796e2AF2da8109e45A1c5Accf236b3B731",
+      "pool": "0xA3617Bb4D7Dc9DD20f79165486097a54b3593164",
+      "feed": "0xF6f373a037c30F0e5010d854385cA89185AE638b",
+      "fee": 100,
+      "deploymentTx": "0x3cb9d6eadb0179f9a268f0985643dcead1fb5c9489d22bfb83f7e7d9cefb712b"
+    },
+    "PLTR": {
+      "stockToken": "0x894E1EC2D74FFE5AEF8Dc8A9e84686acCB964F2A",
+      "vault": "0x764b7e1a883f9Ec86EceC49F4D389dC8593C33CA",
+      "strategy": "0xc1b683c212ffBE2738FFd5fDdf15783158A1B0d8",
+      "pool": "0x851680416A4f4E1c463d45171d61ACDdBc8554c0",
+      "feed": "0x820ABedFF239034956B7A9d2F0a331f9F075eB4c",
+      "fee": 3000,
+      "deploymentTx": "0x924689b03e1dfde372cb9677cf1fa5eaa6de52ddb6f0b80e74bd4ba3129ec629"
+    },
+    "MSTR": {
+      "stockToken": "0xec262a75e413fAfD0dF80480274532C79D42da09",
+      "vault": "0x15a15fB9E6EcF4ED253Bde035220ACcD3796BB9E",
+      "strategy": "0x78048Aa6d961bCF398D74bD3461D38Fa92B7B8d3",
+      "pool": "0x2C08bCEf714bc8124972B7181494FC598e8Ed111",
+      "feed": "0x396118bdFB181e6240E74D243F266B061c0edc3D",
+      "fee": 3000,
+      "deploymentTx": "0x252bb85f6dda333cf0547222f5ab7e37fd130e6b8055a01d13fc6a00ddeb5e1f"
+    },
+    "SPY": {
+      "stockToken": "0x117cc2133c37B721F49dE2A7a74833232B3B4C0C",
+      "vault": "0x8ACd6632717654e854Df18eDa522a6e34aFC8Ac6",
+      "strategy": "0xe21dE0597300df87c9F21F9257821bd870EC2638",
+      "pool": "0x62FDE201C424d6d07730B77450Dd73928EBAc5f5",
+      "feed": "0x319724394D3A0e3669269846abE664Cd621f9f6A",
+      "fee": 100,
+      "deploymentTx": "0x7f4e124231bd2f3677f73c1d6ba5a42fa203dd1384d3aa5b6e911598acec38b2"
+    },
+    "QQQ": {
+      "stockToken": "0xD5f3879160bc7c32ebb4dC785F8a4F505888de68",
+      "vault": "0x6ad84172AC7711604DF2f34bDd71f9d274d5c227",
+      "strategy": "0x44eeD8Ac703cB60B9D66132635654436E8482927",
+      "pool": "0x4539019B527211998642fEC342C85dcB44c7e5E4",
+      "feed": "0x80901d846d5D7B030F26B480776EE3b29374C2ae",
+      "fee": 100,
+      "deploymentTx": "0xea22569b1c1278576a73473fbc02b0725163f0f474ee6f9f6e02f9ae44a5ee64"
+    }
+  },
+  "verification": {
+    "oracle": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "registry": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "vaultFactory": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "strategyFactory": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "router": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "NVDA.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "NVDA.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "AAPL.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "AAPL.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "TSLA.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "TSLA.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "META.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "META.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "MSFT.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "MSFT.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "AMZN.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "AMZN.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "GOOGL.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "GOOGL.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "PLTR.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "PLTR.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "MSTR.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "MSTR.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "SPY.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "SPY.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "QQQ.vault": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA",
+    "QQQ.strategy": "failed HTTP 403: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA"
+  }
+}

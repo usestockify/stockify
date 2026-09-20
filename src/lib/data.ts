@@ -27,3 +27,20 @@ export function stale<T>(data: T, error: string, fetchedAt?: string): DataEnvelo
 export function loading<T = never>(): DataEnvelope<T> {
   return { status: "loading", data: null };
 }
+
+/** Resolve `promise` or `fallback` after `ms`. Never throws. */
+export function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      },
+    );
+  });
+}

@@ -132,7 +132,7 @@ export async function initStore(startBlock: string) {
         const { createRequire } = await import("module");
         const req = createRequire(path.join(process.cwd(), "package.json"));
         const pg = req("pg") as typeof import("pg");
-        const pool = new pg.Pool({ connectionString: url, max: 4, idleTimeoutMillis: 30_000 });
+        const pool = new pg.Pool({ connectionString: url, max: 4, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 2_000 });
         await pool.query(`
 CREATE TABLE IF NOT EXISTS indexer_state (id integer PRIMARY KEY, payload jsonb NOT NULL);
 CREATE TABLE IF NOT EXISTS pons_launches (token_address text PRIMARY KEY, payload jsonb NOT NULL);
@@ -191,6 +191,11 @@ CREATE TABLE IF NOT EXISTS kv_meta (key text PRIMARY KEY, payload jsonb NOT NULL
     persist(mem);
   })();
   return initPromise;
+}
+
+export function pingStore() {
+  ensureDataDir();
+  return engineName || "json";
 }
 
 export function getStore(startBlock: string): Store {

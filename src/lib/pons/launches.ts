@@ -38,7 +38,7 @@ async function resolvePair(pairToken: Address, client: PublicClient): Promise<Po
   };
 }
 
-async function readCurve(curve: Address, client: PublicClient): Promise<PonsLaunch["curveLive"]> {
+export async function readCurve(curve: Address, client: PublicClient): Promise<PonsLaunch["curveLive"]> {
   try {
     const [graduated, quoteReserve, tokenReserve, sellable, readyToGraduate, feeBps, creatorTaxBps] = await Promise.all([
       client.readContract({ address: curve, abi: ponsBondingCurveAbi, functionName: "graduated" }),

@@ -27,6 +27,7 @@ import { explorerAddress, explorerToken } from "@/lib/chain";
 import { STOCKIFY_MARKETS } from "@/lib/markets";
 import { PONS_CONTRACTS, PROTOCOL_CONTRACTS } from "@/lib/protocol-contracts";
 import { getStockifyCatalog } from "@/lib/stockify/catalog";
+import { isConfigured, marketDeployment } from "@/lib/stockify/deployments";
 import styles from "@/styles/docs.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -261,13 +262,23 @@ export default async function DocsPage() {
               <span>{t("contracts.col.source")}</span>
             </div>
             <div className={styles.contractList}>
-              {MARKETS.map((c) => (
+              {MARKETS.map((c) => {
+                const d = marketDeployment(c.symbol);
+                const vault = d?.vault && isConfigured(d.vault) ? d.vault : null;
+                return (
                 <div className={styles.contractRow} key={c.symbol}>
                   <strong>{c.symbol}</strong>
-                  <span className={styles.address}>—</span>
-                  <span className={styles.verified}>{t("contracts.notDeployed")}</span>
+                  {vault ? (
+                    <a className={styles.address} href={explorerAddress(vault)} target="_blank" rel="noreferrer">
+                      {vault}
+                    </a>
+                  ) : (
+                    <span className={styles.address}>—</span>
+                  )}
+                  <span className={styles.verified}>{vault ? t("contracts.verified") : t("contracts.notDeployed")}</span>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 

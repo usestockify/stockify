@@ -61,6 +61,8 @@ export const vaults: NamespaceMessages = {
     "rangeStatus.out-of-range": "Out of range",
     "rangeStatus.unavailable": "Unavailable",
     "rangeStatus.waiting": "Awaiting deployment",
+    "rangeStatus.paused": "Paused",
+    "rangeStatus.rebalance": "Rebalance required",
 
     "apr.collecting": "Collecting fee history",
     "apr.observed": "Based on {span} of observations",
@@ -121,6 +123,7 @@ export const vaults: NamespaceMessages = {
     "desk.noDeployment": "No Robinhood Chain deployment",
     "table.refPrice": "Reference",
     "table.notDeployed": "Not deployed",
+    "table.live": "LIVE",
     "table.unavailable": "Unavailable",
 
     "fresh.valuationDelayed": "Valuation delayed",

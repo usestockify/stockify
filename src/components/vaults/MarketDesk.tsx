@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { StockLogo } from "@/components/StockLogo";
 import { BrandMark } from "@/components/BrandMark";
+import { StockifyVaultActions } from "@/components/vaults/StockifyVaultActions";
 import { getT } from "@/i18n/server";
-import { explorerToken } from "@/lib/chain";
+import { explorerAddress, explorerToken, USDG_ADDRESS } from "@/lib/chain";
 import { formatPrice } from "@/lib/format";
 import type { StockifyMarket } from "@/lib/markets";
+import { isConfigured, loadManifest } from "@/lib/stockify/deployments";
 import { getStockifyMarket } from "@/lib/stockify/catalog";
+import type { Address } from "viem";
 import "@/styles/market-desk.css";
 
 export async function MarketDesk({ market }: { market: StockifyMarket }) {
   const t = await getT("vaults");
   const row = await getStockifyMarket(market.symbol);
+  const manifest = loadManifest();
+  const live = row?.vault.status === "live" && isConfigured(manifest.router);
   const bid = row?.price?.equity.bid != null ? Number(row.price.equity.bid) : null;
   const ask = row?.price?.equity.ask != null ? Number(row.price.equity.ask) : null;
   const generated = row?.price?.equity.generatedAt;
@@ -36,23 +41,25 @@ export async function MarketDesk({ market }: { market: StockifyMarket }) {
           <div className="mast-stats">
             <article>
               <span className="stat-label">{t("desk.position")}</span>
-              <strong className="stat-value">—</strong>
-              <span className="stat-note">{t("desk.awaiting")}</span>
+              <strong className="stat-value">{row?.vault.tvl ?? "—"}</strong>
+              <span className="stat-note">{live ? t("table.live") : t("desk.awaiting")}</span>
             </article>
             <article>
               <span className="stat-label">{t("desk.range")}</span>
-              <strong className="stat-value">—</strong>
-              <span className="stat-note">{t("rangeStatus.none")}</span>
+              <strong className="stat-value">
+                {row?.vault.lower != null ? `${row.vault.lower} / ${row.vault.current} / ${row.vault.upper}` : "—"}
+              </strong>
+              <span className="stat-note">{t(`rangeStatus.${row?.vault.range ?? "waiting"}`)}</span>
             </article>
             <article>
               <span className="stat-label">{t("desk.usdg")}</span>
-              <strong className="stat-value">—</strong>
-              <span className="stat-note">{t("desk.awaiting")}</span>
+              <strong className="stat-value">{row?.vault.usdgExposure ?? "—"}</strong>
+              <span className="stat-note">{live ? t("table.live") : t("desk.awaiting")}</span>
             </article>
             <article>
               <span className="stat-label">{t("desk.stock")}</span>
-              <strong className="stat-value">—</strong>
-              <span className="stat-note">{t("desk.awaiting")}</span>
+              <strong className="stat-value">{row?.vault.stockExposure ?? "—"}</strong>
+              <span className="stat-note">{live ? t("table.live") : t("desk.awaiting")}</span>
             </article>
           </div>
         </div>
@@ -83,17 +90,47 @@ export async function MarketDesk({ market }: { market: StockifyMarket }) {
           {halted ? <span className="stat-note">{t("desk.halted")}</span> : null}
         </article>
         <article>
-          <span className="stat-label">{t("desk.fees")}</span>
-          <strong>—</strong>
+          <span className="stat-label">{t("contracts.vault")}</span>
+          <strong>
+            {row?.vault.address ? (
+              <a href={explorerAddress(row.vault.address)} target="_blank" rel="noreferrer">
+                {row.vault.address}
+              </a>
+            ) : (
+              t("desk.noDeployment")
+            )}
+          </strong>
         </article>
-        <p>{t("desk.unavailable")}</p>
-        <div className="hex-group">
-          <span className="hex hex-md hex-green">{t("desk.deposit")}</span>
-          <span className="hex-outline hex-notch hex-md hex-slate">{t("desk.withdraw")}</span>
-          <Link className="hex hex-md hex-slate" href="/vaults">
-            {t("desk.cta")}
-          </Link>
-        </div>
+        <article>
+          <span className="stat-label">{t("contracts.position")}</span>
+          <strong>
+            {row?.vault.strategy ? (
+              <a href={explorerAddress(row.vault.strategy)} target="_blank" rel="noreferrer">
+                {row.vault.strategy}
+              </a>
+            ) : (
+              t("desk.noDeployment")
+            )}
+          </strong>
+        </article>
+        <article>
+          <span className="stat-label">{t("desk.fees")}</span>
+          <strong>{row?.vault.feesLifetime ?? "—"}</strong>
+        </article>
+        {live && row?.vault.address ? (
+          <StockifyVaultActions vault={row.vault.address as Address} router={manifest.router as Address} usdg={USDG_ADDRESS} />
+        ) : (
+          <>
+            <p>{t("desk.unavailable")}</p>
+            <div className="hex-group">
+              <span className="hex hex-md hex-green">{t("desk.deposit")}</span>
+              <span className="hex-outline hex-notch hex-md hex-slate">{t("desk.withdraw")}</span>
+              <Link className="hex hex-md hex-slate" href="/vaults">
+                {t("desk.cta")}
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
