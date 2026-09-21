@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { BrandMark } from "./BrandMark";
-import { ContractAddress } from "./ContractAddress";
 import { PrimaryNavigation } from "./PrimaryNavigation";
 import { getT } from "@/i18n/server";
 
@@ -9,9 +8,6 @@ export async function SiteHeader() {
   const t = await getT("nav");
   return (
     <header className="gh">
-      <div className="site-ca-banner">
-        <ContractAddress />
-      </div>
       <div className="gh-inner">
         <Link className="gh-logo" href="/" aria-label={t("aria.home", { name: BRAND.name })}>
           <BrandMark />

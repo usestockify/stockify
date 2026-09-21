@@ -929,8 +929,8 @@ hr.g-hr-soft {
   position: relative;
   z-index: 40;
   width: 100%;
-  background: var(--bg);
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+  background: var(--fog);
+  border-bottom: 1px dashed rgba(61, 59, 79, 0.2);
 }
 .site-ca-banner {
   display: flex;
