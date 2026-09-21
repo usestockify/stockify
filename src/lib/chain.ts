@@ -9,7 +9,7 @@ export const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD" as cons
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
 
 /**
- * Stockify protocol token on Robinhood Chain.
+ * Vaultly protocol token on Robinhood Chain.
  * Override with NEXT_PUBLIC_TOKEN_ADDRESS. This is not USDG and not a Robinhood Stock Token.
  */
 export const TOKEN_ADDRESS = (

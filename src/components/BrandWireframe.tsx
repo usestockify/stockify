@@ -1,7 +1,7 @@
 import { BRAND } from "@/lib/brand";
 
 /**
- * Construction drawing of the pinwheel and wordmark, used as the footer's
+ * Construction drawing of the stacked-bar mark and wordmark, used as the footer's
  * first column. The mill sits on the same grid as the rest of the furniture.
  */
 export function BrandWireframe() {
@@ -23,7 +23,7 @@ export function BrandWireframe() {
       </g>
       <g transform="translate(92 115)">
         <rect x="0.5" y="0.5" width="159" height="159" rx="28" stroke="var(--green)" strokeWidth="1.2" />
-        <image href="/brand/logo.png" x="16" y="16" width="128" height="128" />
+        <image href="/brand/logo.jpg" x="16" y="16" width="128" height="128" />
       </g>
       <g fill="currentColor" opacity="0.7">
         <rect x="12" y="56" width="8" height="8" />
@@ -35,7 +35,7 @@ export function BrandWireframe() {
         {BRAND.name}
       </text>
       <text x="172" y="440" textAnchor="middle" fontFamily="var(--font-mono), monospace" fontSize="11" letterSpacing="3" fill="currentColor" opacity="0.8">
-        FIG. 1 · PINWHEEL
+        FIG. 1 · MARK
       </text>
     </svg>
   );

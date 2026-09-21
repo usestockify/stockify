@@ -34,7 +34,7 @@ export const lending: NamespaceMessages = {
     "dir.eyebrow": "Lending",
     "dir.title.before": "Lending",
     "dir.title.em": "",
-    "dir.intro": "Lending is not a Stockify product. Use Markets, Vaults, Trade and Portfolio.",
+    "dir.intro": "Lending is not a Vaultly product. Use Markets, Vaults, Trade and Portfolio.",
     "dir.cta": "Explore markets",
     "dir.stat.lent": "Lent to markets",
     "dir.stat.marketsOne": "{count} market · {active} active",

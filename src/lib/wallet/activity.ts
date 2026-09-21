@@ -71,10 +71,10 @@ export async function loadIndexedActivity(owner: Address): Promise<{ rows: Walle
   try {
     await initStore(PONS_FACTORY_START_BLOCK.toString()).catch(() => null);
     const local = getStore(PONS_FACTORY_START_BLOCK.toString()).eventsForActor(owner, 40);
-    if (!local.length) return { rows: [], source: "STOCKIFY_INDEXER", scope: "Stockify/PONS activity" };
+    if (!local.length) return { rows: [], source: "STOCKIFY_INDEXER", scope: "Vaultly/PONS activity" };
     return {
       source: "STOCKIFY_INDEXER",
-      scope: "Stockify/PONS activity",
+      scope: "Vaultly/PONS activity",
       rows: local.map((row) => ({
         hash: row.transactionHash as `0x${string}`,
         block: row.blockNumber,

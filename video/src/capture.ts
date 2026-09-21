@@ -1,5 +1,5 @@
 /**
- * Capture the live Stockify UI at film resolution.
+ * Capture the live Vaultly UI at film resolution.
  * Isolated from production — does not change app data or wallet state.
  */
 import { chromium } from "playwright";
@@ -37,7 +37,7 @@ async function findBase(): Promise<string> {
       // try next
     }
   }
-  throw new Error("Stockify dev server not reachable on 3000/3001/3002. Start it, then re-run capture.");
+  throw new Error("Vaultly dev server not reachable on 3000/3001/3002. Start it, then re-run capture.");
 }
 
 async function main() {

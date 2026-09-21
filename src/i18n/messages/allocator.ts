@@ -3,11 +3,11 @@ import type { NamespaceMessages } from "../types";
 export const allocator: NamespaceMessages = {
   en: {
     "meta.title": "Allocator",
-    "meta.description": "Allocate one USDG amount across multiple Stockify stock vaults. Coming soon.",
+    "meta.description": "Allocate one USDG amount across multiple Vaultly stock vaults. Coming soon.",
     "hero.eyebrow": "Allocator",
     "hero.title.before": "Allocator",
     "hero.title.em": "",
-    "hero.intro": "Allocate one USDG amount across multiple Stockify stock vaults. Coming soon.",
+    "hero.intro": "Allocate one USDG amount across multiple Vaultly stock vaults. Coming soon.",
 
     "plan.eyebrow": "Proposal · model {model}",
     "plan.title": "Your split, scored.",
@@ -135,7 +135,7 @@ export const allocator: NamespaceMessages = {
 
     "notes.aria": "Allocator",
     "notes.doesTitle": "What this is",
-    "notes.doesBody": "Allocate one USDG amount across multiple Stockify stock vaults. Coming soon.",
+    "notes.doesBody": "Allocate one USDG amount across multiple Vaultly stock vaults. Coming soon.",
     "notes.notTitle": "Status",
     "notes.notBody": "Coming soon. No live split, score or allocation is shown.",
     "notes.costsTitle": "Until then",

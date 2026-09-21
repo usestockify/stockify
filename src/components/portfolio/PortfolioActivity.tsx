@@ -21,7 +21,7 @@ export function PortfolioActivity({ owner }: { owner: `0x${string}` }) {
         const res = await fetch(`/api/wallet/activity?owner=${owner}`, { cache: "no-store" });
         const json = (await res.json()) as { data?: WalletActivityRow[] | null; error?: string; status?: string; scope?: string; source?: string };
         if (!alive) return;
-        setScope(json.scope ?? (json.source === "STOCKIFY_INDEXER" ? "Stockify/PONS activity" : "BLOCKSCOUT"));
+        setScope(json.scope ?? (json.source === "STOCKIFY_INDEXER" ? "Vaultly/PONS activity" : "BLOCKSCOUT"));
         if (!json.data) {
           setHidden(true);
           setRows([]);

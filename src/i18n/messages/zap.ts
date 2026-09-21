@@ -9,16 +9,16 @@ export const zap: NamespaceMessages = {
     "hero.title.before": "Zap",
     "hero.title.em": "",
     "hero.intro":
-      "Zap is not a Stockify product. Use Markets, Vaults and Trade.",
+      "Zap is not a Vaultly product. Use Markets, Vaults and Trade.",
 
     "notes.aria": "Zap",
     "notes.doesTitle": "Status",
     "notes.doesBody":
-      "Zap is not part of Stockify. This route stays unpublished so leftover links do not look live.",
+      "Zap is not part of Vaultly. This route stays unpublished so leftover links do not look live.",
     "notes.expectTitle": "What to use instead",
     "notes.expectBody": "Deposit USDG into a stock vault, or trade USDG against a supported stock token.",
     "notes.notTitle": "What this is not",
-    "notes.notBody": "Not an aggregator, not a live deposit path, and not a coming-soon Stockify product.",
+    "notes.notBody": "Not an aggregator, not a live deposit path, and not a coming-soon Vaultly product.",
 
     "error.invalidAmount": "Enter a valid amount",
     "error.aboveZero": "Enter an amount above zero",

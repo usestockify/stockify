@@ -41,7 +41,7 @@ export async function readContractReadiness(client: PublicClient = publicClient(
         bytecode: false,
         interfaceOk: false,
         status: "NOT_DEPLOYED",
-        detail: "Address not configured. Stockify vault contracts are not deployed.",
+        detail: "Address not configured. Vaultly vault contracts are not deployed.",
       });
       continue;
     }

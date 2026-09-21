@@ -148,18 +148,15 @@ export function Micro({
   );
 }
 
-/** Four-rhombus pinwheel, same geometry as the brand mark. */
+/** Stacked-bar Vaultly mark, same geometry as the brand asset. */
 export function Pinwheel({ x, y, r = 18 }: { x: number; y: number; r?: number }) {
-  const s = r / 27.2;
+  const s = r / 32;
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <g transform="rotate(-18)">
-        <polygon points="0,-27.2 6.8,-16.1 0,-5 -6.8,-16.1" fill="#0B4F2C" />
-        <polygon points="27.2,0 16.1,-6.8 5,0 16.1,6.8" fill="#1AA05C" />
-        <polygon points="0,27.2 6.8,16.1 0,5 -6.8,16.1" fill="#0B4F2C" />
-        <polygon points="-27.2,0 -16.1,-6.8 -5,0 -16.1,6.8" fill="#1AA05C" />
-      </g>
-      <rect x="-3.35" y="-3.35" width="6.7" height="6.7" fill="#9FDCB0" transform="rotate(45)" />
+      <rect x="-32" y="-32" width="64" height="64" fill="#000" />
+      <rect x="-12" y="-14" width="24" height="7" fill="#fff" />
+      <rect x="-17" y="-3.5" width="34" height="7" fill="#fff" />
+      <rect x="-22" y="7" width="44" height="7" fill="#fff" />
     </g>
   );
 }

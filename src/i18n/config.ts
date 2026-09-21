@@ -1,7 +1,7 @@
 export const LOCALES = ["en", "es", "zh", "fr", "de"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
-export const LOCALE_COOKIE = "stockify-lang";
+export const LOCALE_COOKIE = "vaultly-lang";
 
 /** Native names, shown in the switcher. */
 export const LOCALE_LABELS: Record<Locale, string> = {

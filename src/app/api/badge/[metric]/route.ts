@@ -5,12 +5,12 @@ export const dynamic = "force-dynamic";
 
 /**
  * Embeddable SVG badges. Supply and burn figures stay unpublished until a
- * Stockify token exists.
+ * Vaultly token exists.
  */
-const SLATE = "#1C211D";
-const MINT = "#C5D6C8";
-const FOG = "#F3EFE6";
-const INK = "#1B4332";
+const SLATE = "#000000";
+const MINT = "#FFFFFF";
+const FOG = "#F5F5F5";
+const INK = "#000000";
 
 const width = (text: string) => Math.ceil(text.length * 6.6) + 20;
 
@@ -41,7 +41,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ metric: string
 
   if (key === "vaults") return svg("markets listed", String(STOCKIFY_MARKETS.length));
   if (key === "split") return svg("fee policy", "unpublished");
-  if (key === "burned" || key === "supply" || key === "circulating") return svg("stockify token", "unpublished");
+  if (key === "burned" || key === "supply" || key === "circulating") return svg("vaultly token", "unpublished");
   if (key === "checks") return svg("verified", "—");
   return svg("unknown badge", key.slice(0, 24), "#E8D9C4");
 }

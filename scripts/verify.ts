@@ -1,8 +1,8 @@
 /**
- * Stockify verification run.
+ * Vaultly verification run.
  *
  * Exercises configured contracts on Robinhood Chain and the production site the
- * same way the app does, without sending a transaction. Unpublished Stockify
+ * same way the app does, without sending a transaction. Unpublished Vaultly
  * roles are skipped. Nothing is signed.
  *
  *   npm run verify                       # chain + site
@@ -39,7 +39,7 @@ const OUT = opt("--out", "public/verification/latest.json");
 
 const TEST_ACCOUNT = BURN_ADDRESS as Address; // never holds a key; only used inside eth_call simulations
 const DEPOSIT_USDG = parseUnits("100", 6);
-/** Unpublished until Stockify vaults publish a fee policy. */
+/** Unpublished until Vaultly vaults publish a fee policy. */
 const CLAIM = { buyback: 20, treasury: 10 };
 const MAX = ("0x" + "f".repeat(64)) as Hex;
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
@@ -155,7 +155,7 @@ async function main() {
   await check(con, "Registry", async () => ({
     status: VAULT_PINS.length === 0 ? "skip" : LIVE.length === VAULT_PINS.length ? "pass" : "fail",
     detail: VAULT_PINS.length === 0
-      ? "No Stockify vaults are published. Registry stays Not configured."
+      ? "No Vaultly vaults are published. Registry stays Not configured."
       : `${LIVE.length} of ${VAULT_PINS.length} pinned vaults resolve to a registry entry (${MANAGED_VAULTS.length} entries in total)`,
   }));
   for (const { pin, entry } of LIVE) {
@@ -383,7 +383,7 @@ async function main() {
     "Token and liquidity",
     PROTOCOL_TOKEN_LIVE
       ? "Where a published protocol token sits onchain."
-      : "No Stockify protocol token is published. Supply checks stay skipped.",
+      : "No Vaultly protocol token is published. Supply checks stay skipped.",
   );
   if (!PROTOCOL_TOKEN_LIVE) {
     await check(tok, "Protocol token", async () => ({ status: "skip", detail: "Not configured. No ticker, burn address or team wallets are published." }));

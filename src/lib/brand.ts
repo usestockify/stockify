@@ -19,20 +19,20 @@ function siteUrl() {
 }
 
 export const BRAND = {
-  name: "stockify",
+  name: "vaultly",
   /** Title-case name for SEO, metadata and page titles. */
-  titleName: "Stockify",
-  nameUpper: "STOCKIFY",
+  titleName: "Vaultly",
+  nameUpper: "VAULTLY",
   tagline: "USDG for stock markets.",
   ogDescription: "USDG liquidity infrastructure for tokenized stock markets on Robinhood Chain.",
   description: "USDG liquidity infrastructure for tokenized stock markets on Robinhood Chain.",
   /** Short label in asset lists. No protocol ticker is published. */
-  token: "stockify",
+  token: "vaultly",
   /** Drop the mark file here; BrandMark reads this path and nothing else. */
-  logoSrc: "/brand/logo.png",
+  logoSrc: "/brand/logo.jpg",
   /** X / Twitter handle without the @. */
-  xHandle: envText(process.env.NEXT_PUBLIC_X_HANDLE, "_stockify"),
-  xUrl: envText(process.env.NEXT_PUBLIC_X_URL, "https://x.com/_stockify"),
+  xHandle: envText(process.env.NEXT_PUBLIC_X_HANDLE, "_vaultly"),
+  xUrl: envText(process.env.NEXT_PUBLIC_X_URL, "https://x.com/_vaultly"),
   /** Telegram discussion group. Override with NEXT_PUBLIC_TELEGRAM_URL if the invite is rotated. */
   telegramUrl: envText(process.env.NEXT_PUBLIC_TELEGRAM_URL, "https://t.me/+qUeVjZqryk4yOThk"),
   repoUrl: envText(process.env.NEXT_PUBLIC_REPO_URL, "https://github.com/pablooalonnso-web/claudemaxing5"),
@@ -40,7 +40,7 @@ export const BRAND = {
   repoBranch: envText(process.env.NEXT_PUBLIC_REPO_BRANCH, "main"),
   siteUrl: siteUrl(),
   /** Custom DOM event name fired after a wallet transaction changes a vault. */
-  vaultUpdatedEvent: "stockify:vault-updated",
+  vaultUpdatedEvent: "vaultly:vault-updated",
 } as const;
 
 export const CHAIN_NAME = "Robinhood Chain";

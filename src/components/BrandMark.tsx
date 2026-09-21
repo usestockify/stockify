@@ -1,7 +1,7 @@
 import { BRAND } from "@/lib/brand";
 
 /**
- * Replaceable logo slot. Put the Stockify mark at `BRAND.logoSrc`
+ * Replaceable logo slot. Put the Vaultly mark at `BRAND.logoSrc`
  * (`public/brand/logo.png`). This component does not invent an icon.
  */
 export function BrandMark({

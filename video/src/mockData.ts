@@ -1,5 +1,5 @@
 /**
- * VIDEO-ONLY simulated figures. Never imported by the Stockify application.
+ * VIDEO-ONLY simulated figures. Never imported by the Vaultly application.
  */
 export const MOCK = {
   disclaimer: "simulated demonstration",

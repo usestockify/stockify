@@ -34,7 +34,7 @@ type WalletState = {
 };
 
 const WalletContext = createContext<WalletState | null>(null);
-const STORAGE_KEY = "stockify:wallet";
+const STORAGE_KEY = "vaultly:wallet";
 
 function injected(): EIP1193Provider | undefined {
   if (typeof window === "undefined") return undefined;

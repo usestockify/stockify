@@ -187,7 +187,7 @@ export function MarketTopologyHero({ className }: { className?: string }) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = "#9FDCB0";
+      ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(-r * 0.123, -r * 0.123, r * 0.246, r * 0.246);
       ctx.restore();
     };

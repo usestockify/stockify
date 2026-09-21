@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     images: ["/og.png"],
   },
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: "black" },
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon", sizes: "16x16" },
@@ -43,8 +43,8 @@ export const metadata: Metadata = {
 /** Drives the browser chrome colour on installed and mobile sessions. */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F3EFE6" },
-    { media: "(prefers-color-scheme: dark)", color: "#1B4332" },
+    { media: "(prefers-color-scheme: light)", color: "#000000" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
   width: "device-width",
   initialScale: 1,

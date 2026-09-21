@@ -35,9 +35,9 @@ export type ManagedVaultRegistryEntry = {
 export const MANAGED_VAULTS = managedVaults as ManagedVaultRegistryEntry[];
 
 /**
- * User-facing vault pins. Stockify does not publish unpublished deployments;
+ * User-facing vault pins. Vaultly does not publish unpublished deployments;
  * the public catalog lives in `src/lib/markets.ts` and shows dashes until
- * a reviewed Stockify deployment is added here.
+ * a reviewed Vaultly deployment is added here.
  */
 export const VAULT_PINS: { id: string; vault: string; symbol: string }[] = [];
 

@@ -20,7 +20,7 @@
     {
       "id": "network",
       "title": "Network",
-      "description": "Robinhood Chain is the network Stockify is built for. Head and site checks wait for a published verification run.",
+      "description": "Robinhood Chain is the network Vaultly is built for. Head and site checks wait for a published verification run.",
       "checks": [
         {
           "name": "Chain id",
@@ -33,7 +33,7 @@
     {
       "id": "contracts",
       "title": "Contracts",
-      "description": "Stockify contract roles. Only configured addresses are listed.",
+      "description": "Vaultly contract roles. Only configured addresses are listed.",
       "checks": [
         {
           "name": "USDG",

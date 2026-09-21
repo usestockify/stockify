@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 /**
- * Plain-text supply endpoints. Unpublished until a Stockify token exists.
+ * Plain-text supply endpoints. Unpublished until a Vaultly token exists.
  */
 export async function GET(_req: Request, ctx: { params: Promise<{ kind: string }> }) {
   const { kind } = await ctx.params;

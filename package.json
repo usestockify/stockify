@@ -1,8 +1,8 @@
 {
-  "name": "stockify",
+  "name": "vaultly",
   "version": "1.0.0",
   "private": true,
-  "description": "stockify: USDG liquidity infrastructure for tokenized stock markets on Robinhood Chain.",
+  "description": "vaultly: USDG liquidity infrastructure for tokenized stock markets on Robinhood Chain.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",

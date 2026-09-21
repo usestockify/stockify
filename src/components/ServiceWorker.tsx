@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 /**
- * Registers the service worker that makes Stockify installable. It caches the app
+ * Registers the service worker that makes Vaultly installable. It caches the app
  * shell only; chain data and API responses always go to the network. Registration
  * is deliberately deferred to load so it never competes with the first render.
  */

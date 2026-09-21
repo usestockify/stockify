@@ -203,7 +203,7 @@ async function preflight(): Promise<MarketPlan[]> {
       pool,
       fee,
       tickSpacing,
-      vaultName: `Stockify ${ticker} Vault`,
+      vaultName: `Vaultly ${ticker} Vault`,
       shareSymbol: `st${ticker}`,
     });
   }

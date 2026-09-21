@@ -154,7 +154,7 @@ export function PrimaryNavigation() {
       <div className="gh-actions">
         <LanguageSwitcher />
         <a className="gh-x" href={BRAND.xUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onX", { handle: BRAND.xHandle })}>
-          {BRAND.xHandle}
+          @{BRAND.xHandle}
         </a>
         <WalletConnectButton />
         <button
@@ -191,7 +191,7 @@ export function PrimaryNavigation() {
           ))}
           <div className="gh-mobile-actions">
             <a className="gh-x" href={BRAND.xUrl} target="_blank" rel="noopener noreferrer" aria-label={t("aria.onX", { handle: BRAND.xHandle })}>
-              {BRAND.xHandle}
+              @{BRAND.xHandle}
             </a>
             <LanguageSwitcher variant="list" />
           </div>

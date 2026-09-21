@@ -107,7 +107,7 @@ export async function readWalletPositions(owner: Address): Promise<WalletPositio
       positions.push({
         key: `st${ticker}`,
         symbol: `st${ticker}`,
-        name: `Stockify ${ticker} Vault`,
+        name: `Vaultly ${ticker} Vault`,
         address: market.vault,
         native: false,
         decimals,
@@ -120,7 +120,7 @@ export async function readWalletPositions(owner: Address): Promise<WalletPositio
       positions.push({
         key: `st${ticker}`,
         symbol: `st${ticker}`,
-        name: `Stockify ${ticker} Vault`,
+        name: `Vaultly ${ticker} Vault`,
         address: market.vault,
         native: false,
         decimals: null,

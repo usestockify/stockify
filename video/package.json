@@ -2,7 +2,7 @@
   "name": "stockify-film",
   "private": true,
   "version": "1.0.0",
-  "description": "Cinematic Stockify product film. Isolated from the production app.",
+  "description": "Cinematic Vaultly product film. Isolated from the production app.",
   "scripts": {
     "preview": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts StockifyFilm out/stockify-film-final.mp4 --codec h264 --timeout 120000 --concurrency 4",

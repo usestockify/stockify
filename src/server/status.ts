@@ -120,7 +120,7 @@ export async function getStatus(): Promise<StatusReport> {
   }
 
   const stockifyIdx = stockifySnapshot();
-  mark("Stockify indexer", Boolean(stockifyIdx));
+  mark("Vaultly indexer", Boolean(stockifyIdx));
 
   const allMarkets = vaultOk === 11 && stratOk === 11 && coreOk === 5 && block.ok;
   const unpublished = markets.length === 0 || !isConfigured(manifest.vaultFactory);
@@ -147,14 +147,14 @@ export async function getStatus(): Promise<StatusReport> {
     tone: (stockifyIdx || ponsIdx ? "good" : "warning") as Tone,
     state: stockifyIdx ? "indexing" : "pending",
     tag: "Indexer",
-    detail: "PONS and Stockify event indexers.",
+    detail: "PONS and Vaultly event indexers.",
   };
 
   const overall = unpublished
     ? { tone: "neutral" as Tone, label: "Markets not yet deployed" }
     : allMarkets
-      ? { tone: "good" as Tone, label: "Stockify markets 11 / 11 Operational" }
-      : { tone: "danger" as Tone, label: `Stockify markets ${vaultOk} / 11` };
+      ? { tone: "good" as Tone, label: "Vaultly markets 11 / 11 Operational" }
+      : { tone: "danger" as Tone, label: `Vaultly markets ${vaultOk} / 11` };
 
   const data: StatusReport = { checkedAt: new Date(now).toISOString(), overall, components: { api, oracle, vault, keeper }, jobs };
   g.__statusCache = { at: now, data };

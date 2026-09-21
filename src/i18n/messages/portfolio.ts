@@ -4,7 +4,7 @@ export const portfolio: NamespaceMessages = {
   en: {
     "meta.title": "Portfolio",
     "page.eyebrow": "Portfolio",
-    "page.title.before": "Your Stockify ",
+    "page.title.before": "Your Vaultly ",
     "page.title.em": "portfolio.",
     "page.intro": "See your USDG balance, stock-token holdings, vault shares, fees and onchain activity in one place.",
 
@@ -93,7 +93,7 @@ export const portfolio: NamespaceMessages = {
     "wallet.loadingEyebrow": "Secure wallet",
     "wallet.loading": "Loading your wallet session…",
     "wallet.eyebrow": "Your wallet",
-    "wallet.connectTitle": "Connect wallet to view your Stockify portfolio.",
+    "wallet.connectTitle": "Connect wallet to view your Vaultly portfolio.",
     "wallet.available": "Continue with MetaMask, Rabby, Coinbase Wallet or any browser wallet that supports Robinhood Chain.",
     "wallet.notDetected": "No browser wallet was detected. Install MetaMask, Rabby or another EIP-1193 wallet, then reload this page.",
     "wallet.connect": "Connect wallet",

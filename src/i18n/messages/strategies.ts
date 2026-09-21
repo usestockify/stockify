@@ -8,7 +8,7 @@ export const strategies: NamespaceMessages = {
     "hero.title.before": "Strategies",
     "hero.title.em": "",
     "hero.intro":
-      "Multi-market Stockify strategies that combine exposure across supported stock vaults.",
+      "Multi-market Vaultly strategies that combine exposure across supported stock vaults.",
     "hero.live": "Coming soon",
 
     "facts.earns": "Earns",
@@ -21,7 +21,7 @@ export const strategies: NamespaceMessages = {
     "allocator.visualAria": "Allocator",
     "allocator.visualTitle": "One USDG amount across stock vaults",
     "allocator.visualSub": "Coming soon.",
-    "allocator.lede": "Allocate one USDG amount across multiple Stockify stock vaults.",
+    "allocator.lede": "Allocate one USDG amount across multiple Vaultly stock vaults.",
     "allocator.earns": "Coming soon",
     "allocator.exposure": "Exposure follows the vaults you choose",
     "allocator.foot": "Coming soon",
@@ -33,7 +33,7 @@ export const strategies: NamespaceMessages = {
     "basket.visualTitle": "Across supported stock vaults",
     "basket.visualSub": "Coming soon.",
     "basket.lede":
-      "Multi-market Stockify strategies that combine exposure across supported stock vaults.",
+      "Multi-market Vaultly strategies that combine exposure across supported stock vaults.",
     "basket.earns": "Coming soon",
     "basket.exposure": "Combined stock-vault exposure",
     "basket.foot": "Coming soon",
@@ -63,7 +63,7 @@ export const strategies: NamespaceMessages = {
     "notes.aria": "Strategies",
     "notes.isTitle": "What this is",
     "notes.isBody":
-      "Multi-market Stockify strategies that combine exposure across supported stock vaults. Coming soon.",
+      "Multi-market Vaultly strategies that combine exposure across supported stock vaults. Coming soon.",
     "notes.notTitle": "Status",
     "notes.notBody": "Coming soon. No live strategy, ranking or allocation is shown.",
     "notes.beforeTitle": "Until then",
@@ -71,16 +71,16 @@ export const strategies: NamespaceMessages = {
       "Use Markets, Vaults, Trade and Portfolio. Strategies will not take deposits until they ship.",
 
     "page.metaTitle": "Strategies",
-    "page.metaDescription": "Multi-market Stockify strategies that combine exposure across supported stock vaults. Coming soon.",
+    "page.metaDescription": "Multi-market Vaultly strategies that combine exposure across supported stock vaults. Coming soon.",
     "page.back": "Strategies",
     "page.title.before": "Strategies",
     "page.title.em": "",
     "page.intro":
-      "Multi-market Stockify strategies that combine exposure across supported stock vaults. Coming soon.",
+      "Multi-market Vaultly strategies that combine exposure across supported stock vaults. Coming soon.",
     "page.notesAria": "Strategies",
     "page.doesTitle": "What this is",
     "page.doesBody":
-      "A way to combine exposure across supported Stockify stock vaults. It is not live.",
+      "A way to combine exposure across supported Vaultly stock vaults. It is not live.",
     "page.notTitle": "Status",
     "page.notBody": "Coming soon. No ranking, yield or allocation is shown.",
     "page.costsTitle": "Until then",
