@@ -13,7 +13,7 @@ export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as cons
  * Override with NEXT_PUBLIC_TOKEN_ADDRESS. This is not USDG and not a Robinhood Stock Token.
  */
 export const TOKEN_ADDRESS = (
-  process.env.NEXT_PUBLIC_TOKEN_ADDRESS?.trim() || "0x1d414481455b50dde4d707ad67feb24c967b65b8"
+  process.env.NEXT_PUBLIC_TOKEN_ADDRESS?.trim() || "0x431b62c79d76b8deca3cacfae49917b5f45064a9"
 ) as `0x${string}`;
 export const PROTOCOL_TOKEN_LIVE = TOKEN_ADDRESS !== ZERO_ADDRESS;
 
